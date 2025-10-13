@@ -7,6 +7,10 @@ import { getTimeAgo } from "../../utils/getTimeAgo";
 export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
     // Combine date and time from API to create a proper datetime string
     const timeAgo = getTimeAgo(article.dateTimePub);
+    console.log("Categories:", article.categories);
+    const category = article.categories?.[0]?.label?.split('/')?.[0] ?? 'Uncategorized';
+    const source = article.source?.title ?? 'Unknown Source';
+
 
     // IMG-SRC: full width of the container, 14rem height(h-56) crop the image(cover) 
     // Divide tailwind size by 4 to get rem
@@ -17,8 +21,8 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
         <article className="rounded-md shadow hover:shadow-lg transition overflow-hidden m-6 news-card">
             <img src={article.image} alt={article.title} className="w-full h-56 object-cover news-image"/>
             <div className="text-xs text-gray-500 mb-1 p-2 text-left">
-            {article.categories?.[0]?.label?.split('/')?.[0] ?? 'Uncategorized'} • 
-            {article.source?.name ?? 'Unknown Source'} •
+            {category} • 
+            {source} •
             {timeAgo}
             </div>
             <h2 className="text-left text-lg font-bold p-2 mb-1" >{article.title}</h2>

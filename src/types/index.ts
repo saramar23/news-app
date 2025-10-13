@@ -9,8 +9,8 @@ export interface Article {
     dateTime: string;           // Full datetime in UTC
     dateTimePub: string; 
     source: {
-      id: string;
-      name: string;
+      dataType: string;
+      title: string;
       uri: string;
     };
     author: string;

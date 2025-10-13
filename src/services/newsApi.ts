@@ -63,6 +63,15 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<Ar
             sortOption === "Most Relevant" ? "rel" : sortOption === "Most Shared" ? "socialScore" : "date",
         articlesCount: 2,
         articlesPage: page, // tells event registry which page I want
+        returnInfo: {
+            articleInfo: {
+              categories: true,
+              concepts: false,
+              location: false,
+              image: true,
+              eventUri: false
+            }
+        },                
         apiKey: apiKey
     };
         var attempts = 0;
