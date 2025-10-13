@@ -8,11 +8,15 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
     // Combine date and time from API to create a proper datetime string
     const timeAgo = getTimeAgo(article.dateTimePub);
     console.log("Categories:", article.categories);
-    const category = article.categories?.[0]?.label?.split('/')?.[0] ?? 'Uncategorized';
+    // Access first category obj (it seems each article fetched from EventRegistry has multiple categories)
+    // ? is optional chaining in case categories is missing or empty
+    // The label string will return sth like: "dmoz/Society/Issues/Warfare_and_Conflict"
+    // Splitting at / and getting index 1 which is the top-lvl cat
+    // No cat or label brings to Uncategorized
+    const category = article.categories?.[0]?.label?.split('/')?.[1] ?? 'Uncategorized';
+    // ?? Is called the -nullish coalescing operator- it falls back to "Unknown source" if the title is null or undefined. Not triggered by ""
     const source = article.source?.title ?? 'Unknown Source';
-
-
-    // IMG-SRC: full width of the container, 14rem height(h-56) crop the image(cover) 
+    // IMG: full width of the container, 14rem height(h-56) crop the image(cover) 
     // Divide tailwind size by 4 to get rem
     // news-image fallback CSS class
     // XS: text size
