@@ -1,28 +1,26 @@
 // - Create `hooks/useFilters.ts` for filter state management
 
-import { useState } from "react";
-import type { AppState, Category, DateRange, SortOptions, Source } from "../types";
+import { useContext } from "react";
+import { FilterContext } from "../contexts/FilterContext";
+import type { Category, DateRange, SortOptions, Source } from "../types";
 
 export const useFilters = () => {
-    const [filters, setFilters] = useState<AppState["filters"]>({
-        // Sets the value of the filters to null as initial state
-        category: null,
-        dateRange: null,
-        source: null,
-        sortOption: null,
-    });
-    
-    const updateCategory = (newCategory: Category | null) => {
+    const filterCtx = useContext(FilterContext);
+        if (!filterCtx) {
+            throw new Error ("Error: useFilters must be used within a FilterProvider.");
+        }
+    const { filters, setFilters } = filterCtx;
+
+    const updateCategory = (newCategory: Category | undefined) => {
         // preState makes a copy of the old filters (to not lose the current dateRange, source, etc..)
-        setFilters(prevState => {
+        setFilters(prevFilters => {
             return {
-                // only updates Category with a new one :)
-                ...prevState, category: newCategory
+                ...prevFilters, category: newCategory
             }
         });
     }
 
-    const updateDateRange = (newDateRange: DateRange | null) => {
+    const updateDateRange = (newDateRange: DateRange | undefined) => {
         setFilters(prevState => {
             return {
                 ...prevState, dateRange: newDateRange
@@ -30,7 +28,7 @@ export const useFilters = () => {
         });
     }
 
-    const updateSource = (newSource: Source | null) => {
+    const updateSource = (newSource: Source | undefined) => {
         setFilters(prevState => {
             return {
                 ...prevState, source: newSource
@@ -38,7 +36,7 @@ export const useFilters = () => {
         });
     }
 
-    const updateSortOptions = (newSortOptions: SortOptions | null) => {
+    const updateSortOptions = (newSortOptions: SortOptions | undefined) => {
         //React gives me the previous sortoption filter and I update it to a new one
         setFilters(prevState => {
             return {

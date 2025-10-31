@@ -18,28 +18,35 @@ import { fetchArticles } from '../services/newsApi';
 import type { Article, FetchArticlesParams } from '../types';
 
 // Pass all the filter options from FetchArticlesParams except query, limit and page. The user will not be able to modify those.... for now
-export const useArticles = (filters: Omit<FetchArticlesParams, 'query' | 'limit' | 'page'>, searchQuery: string, page: number) => {
+export const useArticles = (filters: Omit<FetchArticlesParams, 'query' | 'limit' | 'page'>, searchQuery: string, page: number, pageSize: number) => {
     const [ articles, setArticles ] = useState<Article[]>([]);
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ error, setError ] = useState<string | null>(null);
-    const cacheRef = useRef<{ [key: string]: Article[] }>({});
+    const [ totalResults, setTotalResults ] = useState<number>(0); // store the total number of results from the API.
+
+    const cacheRef = useRef<{ [key: string]: {articles: Article[], totalResults: number}}>({});
     // cacheRef.current[key] stores and retrieves previously fetched results
     // Before stringify: {  filters: { category: "Business", dateRange: "Today" },  searchQuery: "AI news" }
     // After: cacheRef.current = {'{"filters":{"category":"Business"},"searchQuery":"AI"}': [/* article list */], ....
+    
 
     useEffect(() => {
         const fetchData = async() => {
-            const key = JSON.stringify({filters, searchQuery, page});
+            const key = JSON.stringify({filters, searchQuery, page, pageSize});
             if (cacheRef.current[key]) {
-                setArticles(cacheRef.current[key]);
+                const cached = cacheRef.current[key];
+                setArticles(cached.articles);
+                setTotalResults(cached.totalResults);
                 return;
             }
+            setError(null);
             setIsLoading(true);
         try {
             // ...filter: It keeps the code clean and readable, It avoids manually writing each filter field again
-            const result: Article[] = await fetchArticles({ ...filters, query: searchQuery, page});
+            const result: {articles: Article[], totalResults: number} = await fetchArticles({ ...filters, query: searchQuery, page, limit: pageSize});
             cacheRef.current[key] = result; // Storing the result in cache @ [key]
-            setArticles(result);
+            setArticles(result.articles);
+            setTotalResults(result.totalResults);
         } catch (err) {
             err instanceof Error ? setError(err.message) : setError("Unknown error occurred.");
         } finally {
@@ -47,7 +54,7 @@ export const useArticles = (filters: Omit<FetchArticlesParams, 'query' | 'limit'
         }
     };
         fetchData();
-    }, [filters, searchQuery, page]); // Re-render any time either of them changes
-
-    return {articles, isLoading, error};
+    }, [filters, searchQuery, page, pageSize]); // Re-render any time either of them changes, then run fetchData(). fetchData checks the cache or runs fetchArticles(). 
+    // It then updates articles, isLoading, error
+    return {articles, isLoading, error, totalResults};
 };

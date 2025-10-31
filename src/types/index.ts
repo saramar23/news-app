@@ -1,34 +1,34 @@
 export interface Article {
-    uri: string;
+  uri: string;
+  title: string;
+  body: string;
+  url: string;
+  image: string;
+  date: string;               // Date portion (YYYY-MM-DD)
+  time: string;               // Time portion (HH:mm:ss)
+  dateTime: string;           // Full datetime in UTC
+  dateTimePub: string; 
+  source: {
+    dataType: string;
     title: string;
-    body: string;
-    url: string;
-    image: string;
-    date: string;               // Date portion (YYYY-MM-DD)
-    time: string;               // Time portion (HH:mm:ss)
-    dateTime: string;           // Full datetime in UTC
-    dateTimePub: string; 
-    source: {
-      dataType: string;
-      title: string;
-      uri: string;
-    };
-    author: string;
-    categories: {
-      uri: string;
-      label: string;
-      wgt: number;
-    }[];    
-    sentiment: number; // -1 to 1
-    entities: {
-      people: string[];
-      organizations: string[];
-      locations: string[];
-    };
-    socialScore: number;
-    language: string;
-    // Extensible for future API changes
-    [key: string]: unknown;
+    uri: string;
+  };
+  author: string;
+  categories: {
+    uri: string;
+    label: string;
+    wgt: number;
+  }[];    
+  sentiment: number; // -1 to 1
+  entities: {
+    people: string[];
+    organizations: string[];
+    locations: string[];
+  };
+  socialScore: number;
+  language: string;
+  // Extensible for future API changes
+  [key: string]: unknown;
 }
 
 export type ArticleCardProps = {
@@ -36,17 +36,18 @@ export type ArticleCardProps = {
 }
 
 export interface AppState {
-    articles: Article[];
-    filters: {
-      category: Category | null;
-      dateRange: DateRange | null;
-      source: Source | null;
-      sortOption: SortOptions | null;
-    };
-    searchQuery: string;
-    loading: boolean;
-    error: string | null;
-    todaysPick: Article[];
+  articles: Article[];
+  totalResults: number;
+  filters: {
+    category: Category | undefined;
+    dateRange: DateRange | undefined;
+    source: Source | undefined;
+    sortOption: SortOptions | undefined;
+  };
+  searchQuery: string;
+  loading: boolean;
+  error: string | null;
+  todaysPick: Article[];
 }
 
 export type ArticleGridProps = {
@@ -61,7 +62,6 @@ export type Category =
 | 'Business' 
 | 'Health' 
 | 'Science' 
-| 'Entertainment';
 
 export type DateRange = 
 | 'Today'
@@ -69,9 +69,9 @@ export type DateRange =
 | 'This Month';
 
 export interface Source {
-    id: string;
-    name: string;
-    uri: string;
+  id: string;
+  name: string;
+  uri: string;
 }
 
 export type SortOptions =
@@ -89,3 +89,18 @@ export type FetchArticlesParams = {
   page?: number;
 }
 
+export type SearchContextType = {
+  searchQuery: string;
+  updateSearchQuery: (newQuery: string) => void;
+}
+
+export type FilterContextType = {
+  filters: AppState["filters"];
+  setFilters: React.Dispatch<React.SetStateAction<AppState["filters"]>>;
+}
+
+export type PaginationProps = {
+  page: number,
+  setPage: (newPage: number) => void,
+  totalPages: number
+}

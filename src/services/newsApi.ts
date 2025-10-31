@@ -19,7 +19,7 @@
 import type { Article, FetchArticlesParams } from "../types";
 const apiKey = import.meta.env.VITE_NEWS_API_KEY;
 
-export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<Article[]> => {
+export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{articles: Article[]; totalResults: number}> => {
     
     const url = new Request("https://eventregistry.org/api/v1/article/getArticles");
     const { category, dateRange, source, sortOption = "Latest", query, page = 1} = params;
@@ -61,7 +61,7 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<Ar
         resultType: "articles",
         articlesSortBy:
             sortOption === "Most Relevant" ? "rel" : sortOption === "Most Shared" ? "socialScore" : "date",
-        articlesCount: 2,
+        articlesCount: 6,
         articlesPage: page, // tells event registry which page I want
         includeArticleCategories: true,                
         apiKey: apiKey
@@ -88,7 +88,9 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<Ar
                 if (!data?.articles?.results) {
                     throw new Error("Unexpected response format");
                 }
-                return data.articles.results;
+                return {articles: data.articles.results, 
+                    totalResults: data.articles.totalResults ?? 0
+                }
                 
             } catch (error) {
                 attempts++;
@@ -101,11 +103,15 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<Ar
             }
             if (attempts >= maxAttempts) {
                 console.error("Error. Max attempts reached.");
-                return[];
+                return{
+                    articles: [], totalResults: 0
+                };
             }
         }
     }
-    return[];
+    return{
+        articles: [], totalResults: 0
+    };
 }
 
 

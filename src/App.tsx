@@ -2,14 +2,16 @@ import "./App.css"
 import { useEffect } from "react";
 import { fetchArticles } from "./services/newsApi";
 import { HomePage } from "./components/HomePage/HomePage";
+import { SearchProvider } from "./contexts/SearchContext";
+import { FilterProvider } from "./contexts/FilterContext";
 
 function App() {
 
   useEffect(() => {
     const getArticles = async () => {
       try {
-        const articles = await fetchArticles();
-        console.log("Fetched articles:", articles.length);
+        const fetchedArticles = await fetchArticles();
+        console.log("Fetched articles:", fetchedArticles.articles.length);
       } catch (error) {
         console.error("Error fetching articles:", error);
       }
@@ -19,7 +21,11 @@ function App() {
   }, []);
 
   return (
-    <HomePage />
+    <SearchProvider>
+      <FilterProvider>
+          <HomePage />
+      </FilterProvider>
+    </SearchProvider>
   );
 }
 

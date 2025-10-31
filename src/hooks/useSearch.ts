@@ -1,14 +1,11 @@
 // - Create `hooks/useSearch.ts` for search functionality
 
-import { useState } from "react"
+import { useContext } from "react";
+import { SearchContext } from "../contexts/SearchContext";
 
 export const useSearch = () => {
-    const [searchQuery, setSearchQuery] = useState("");
+    const context = useContext(SearchContext);
 
-    const updateSearchQuery = (newQuery: string) => {
-        // Keeps useSearch encapsulated — nothing outside needs to know about setSearchQuery directly.
-        setSearchQuery(newQuery);
-    };
-
-    return { searchQuery, updateSearchQuery };
+    if (!context) throw new Error("useSearch error");
+    return context;
 }
