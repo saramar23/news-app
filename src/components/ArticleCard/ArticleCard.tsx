@@ -7,7 +7,7 @@ import { getTimeAgo } from "../../utils/getTimeAgo";
 export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
     // Combine date and time from API to create a proper datetime string
     const timeAgo = getTimeAgo(article.dateTimePub);
-    const imgSource = article.image || "public/media/image-placeholder.png";
+    const imgSource = article.image || "/media/image-placeholder.png";
 
     // Access first category obj (it seems each article fetched from EventRegistry has multiple categories)
     // ? is optional chaining in case categories is missing or empty

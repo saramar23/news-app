@@ -58,10 +58,21 @@ export type ArticleGridProps = {
 
 export type Category = 
 | 'Technology' 
-| 'Gaming' 
+| 'Games' 
 | 'Business' 
 | 'Health' 
 | 'Science' 
+
+// Record<Category, string> ensures map stays in sync with Category type, if I miss one of the Category in the CategoryMap, TS will yell at me
+// On the right side is how the API calls the category in its query
+
+export const CATEGORY_URI_MAP: Record<Category, string> = {
+  Technology: "Computers",
+  Games: "Games",
+  Business: "Business",
+  Health: "Health",
+  Science: "Science"
+};
 
 export type DateRange = 
 | 'Today'

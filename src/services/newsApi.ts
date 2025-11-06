@@ -16,7 +16,8 @@
 // **Success Criteria:** Can successfully fetch and log articles from NewsAPI.ai
 
 
-import type { Article, FetchArticlesParams } from "../types";
+import { CATEGORY_URI_MAP, type Article, type FetchArticlesParams } from "../types";
+
 const apiKey = import.meta.env.VITE_NEWS_API_KEY;
 
 export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{articles: Article[]; totalResults: number}> => {
@@ -27,7 +28,13 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
     const queryObject: Record<string, any> = {};
 
     if (category) {
-        queryObject.categoryUri = `dmoz/${category}`;
+        const mapped = CATEGORY_URI_MAP[category];
+        if (mapped) {
+            queryObject.categoryUri = `dmoz/${mapped}`;
+            queryObject.lang = "eng";          //
+        } else {                            //
+            queryObject.category = category; //
+        }
     }
 
     if (query) {
@@ -53,7 +60,6 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
         query: {
             $query: queryObject,
             $lang: "eng",
-            
             $filter: {
                 forceMaxDataTimeWindow: "30",
             },
@@ -70,6 +76,8 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
         const maxAttempts = 3;
         while (attempts < maxAttempts) {
             try {
+                console.log("Fetching category:", category, "→", queryObject.categoryUri); /////////////
+
                 const response = await fetch(url, {
                     method: "POST",
                     headers: {
@@ -85,13 +93,15 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
                     continue;
                 }
                 const data = await response.json();   
+                console.log("Fetched", data.articles.results.length, "articles for", category); /////////
+
                 if (!data?.articles?.results) {
-                    throw new Error("Unexpected response format");
+                    throw new Error("Unexpected response format (data is not in JSON format).");
                 }
-                return {articles: data.articles.results, 
+                return {
+                    articles: data.articles.results, 
                     totalResults: data.articles.totalResults ?? 0
                 }
-                
             } catch (error) {
                 attempts++;
             if (error instanceof Error && error.name === "AbortError") {
@@ -158,7 +168,7 @@ export const fetchArticleById = async (params: Article["uri"]): Promise<Article 
                 console.log("Sorry but we couldn't find any article with that id :( .");
                 return null;
             }
-            console.log("Your article here: ");
+            console.log("Article fetched by id successfully :D Gg!");
             return data.article as Article;
         } catch (error) {
             console.error(`Attempt ${attempts + 1} error:`, error);

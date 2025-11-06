@@ -1,3 +1,20 @@
+// ### Task 5: Search Implementation
+// **Objective:** Enable users to search articles by title and keywords
+
+// **Requirements:**
+// - Build `SearchBar` component with input validation
+// - Implement debounced search to avoid excessive API calls
+// - Add search result highlighting or indication
+// - Handle empty search states and no results scenarios
+// - Integrate with existing article fetching logic
+
+// **Key Considerations:**
+// - What's the optimal debounce delay for user experience?
+// - How will you provide feedback during search operations?
+// - Should search history be maintained locally?
+
+// ---
+
 import { useState, useEffect } from "react";
 import { useSearch } from "../../hooks/useSearch";
 
@@ -38,7 +55,7 @@ export const SearchBar = () => {
 
    return (
     <>
-        <nav aria-label="Main Navigation" className="flex border-solid rounded-md shadow focus:outline rounded-md w-md">
+        <nav aria-label="Main Navigation" className="flex border-solid rounded-md shadow focus:outline w-md">
             <form role="search" 
                   onSubmit={handleSearch}
                   className="flex justify-between items-center gap-2 w-full">

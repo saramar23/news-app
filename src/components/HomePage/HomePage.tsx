@@ -24,9 +24,9 @@ export const HomePage: React.FC = () => {
     return (
         <div className="pt-20 pb-6">
             <Header />
-            <div className="flex items-center justify-between flex-wrap gap-4 my-4 mt-2">
+            <div className="flex justify-between flex-wrap gap-4 mt-2 px-6">
                 <h2 className="text-xl font-semibold">Latest News</h2>
-                <div className="flex gap-4">
+                <div className="flex justify-around gap-4">
                     <CategoryFilter />
                     <DateRangeFilter />
                 </div>
