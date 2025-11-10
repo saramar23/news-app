@@ -9,7 +9,7 @@ export const Header = () => {
                 <SearchBar />
                 <ul className="flex gap-4 justify-center items-center py-4">
                     <li><a>Technology</a></li>
-                    <li><a>Gaming</a></li>
+                    <li><a>Games</a></li>
                     <li><a>Business</a></li>
                     <li><a>Health</a></li>
                     <li><a>Science</a></li>

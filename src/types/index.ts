@@ -8,6 +8,7 @@ export interface Article {
   time: string;               // Time portion (HH:mm:ss)
   dateTime: string;           // Full datetime in UTC
   dateTimePub: string; 
+  summary: string;
   source: {
     dataType: string;
     title: string;

@@ -32,10 +32,8 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
         if (mapped) {
             queryObject.categoryUri = `dmoz/${mapped}`;
             queryObject.lang = "eng";          //
-        } else {                            //
-            queryObject.category = category; //
         }
-    }
+    }    
 
     if (query) {
         queryObject.keyword = query;
@@ -69,7 +67,8 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
             sortOption === "Most Relevant" ? "rel" : sortOption === "Most Shared" ? "socialScore" : "date",
         articlesCount: 6,
         articlesPage: page, // tells event registry which page I want
-        includeArticleCategories: true,                
+        includeArticleCategories: true,      
+        includeArticleImage: true,    
         apiKey: apiKey
     };
         var attempts = 0;
@@ -94,6 +93,7 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
                 }
                 const data = await response.json();   
                 console.log("Fetched", data.articles.results.length, "articles for", category); /////////
+                
 
                 if (!data?.articles?.results) {
                     throw new Error("Unexpected response format (data is not in JSON format).");

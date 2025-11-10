@@ -1,18 +1,3 @@
-// ### Task 3: Custom Hooks for Data Management
-// **Objective:** Create reusable hooks for state and API interactions
-
-// **Requirements:**
-// - Create `hooks/useArticles.ts` for article fetching and state
-// - Create `hooks/useFilters.ts` for filter state management
-// - Create `hooks/useSearch.ts` for search functionality
-// - Implement loading states, error handling, and data caching
-// - Consider pagination state management
-
-// **Key Considerations:**
-// - How will you prevent unnecessary API calls?
-// - What's the best way to synchronize filters with API requests?
-// - How can you make these hooks composable and reusable?
-
 import { useEffect, useRef, useState } from 'react';
 import { fetchArticles } from '../services/newsApi';
 import type { Article, FetchArticlesParams } from '../types';
@@ -84,6 +69,10 @@ export const useArticles = (
         try {
             // ...filter: It keeps the code clean and readable, It avoids manually writing each filter field again
             const result: {articles: Article[], totalResults: number} = await fetchArticles({ ...filters, query: searchQuery, page, limit: pageSize});
+
+            console.log("useArticles filters:", filters);
+            console.log("useArticles result:", result);
+
 
             setArticles(result.articles);
             setTotalResults(result.totalResults);

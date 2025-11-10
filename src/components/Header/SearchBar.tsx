@@ -24,8 +24,7 @@ export const SearchBar = () => {
 
     useEffect(() => {
         const debounceSearch = setTimeout(() => {
-            if (!inputValue.trim()) return; 
-            updateSearchQuery(inputValue);
+            updateSearchQuery(inputValue.trim());
         }, 500);
 
         return () => {
@@ -49,9 +48,10 @@ export const SearchBar = () => {
         updateSearchQuery(inputValue);
    }
 
-   const clearSearch = () => {
+    const clearSearch = () => {
         setInputValue("");
-   }
+        updateSearchQuery("");
+    }
 
    return (
     <>

@@ -5,6 +5,7 @@ import { ArticleSkeletonCard } from "../ArticleCard/ArticleSkeletonCard";
 
 export const ArticleGrid: React.FC<ArticleGridProps> = ({ articles, isLoading, error }) => {
     // md lg: medium/large screen size
+      
     return (
         <div className="pt-5">
             {isLoading && (
