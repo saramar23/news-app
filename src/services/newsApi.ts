@@ -43,10 +43,29 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
         queryObject.sourceUri = source.uri;
     }
 
-    if (dateRange === "Today") {
-        const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
-        queryObject.dateStart = today;
-        queryObject.dateEnd = today;
+    if (dateRange) {
+        const today = new Date(); // "YYYY-MM-DD"
+        if (dateRange === "Today") {
+            const todayStr = today.toISOString().split("T")[0];
+            queryObject.dateStart = todayStr;
+            queryObject.dateEnd = todayStr;
+        } else if (dateRange === "This Week") {
+            const thisWeekStart = new Date(today);
+            const thisWeekEnd = new Date(today); // for testing 
+            thisWeekStart.setDate(today.getDate() - 7);
+            thisWeekEnd.setDate(today.getDate() - 4); ///////// test
+            queryObject.dateStart = thisWeekStart.toISOString().split("T")[0];
+            queryObject.dateEnd = thisWeekEnd.toISOString().split("T")[0]; // added for testing
+            // queryObject.dateEnd = today.toISOString().split("T")[0]; removed for testing
+        } else if (dateRange === "This Month") {
+            const thisMonthStart = new Date(today);
+            const thisMonthEnd = new Date(today); //////
+            thisMonthStart.setDate(today.getDate() - 30);
+            thisMonthEnd.setDate(today.getDate() - 14); ///////////
+            queryObject.dateStart = thisMonthStart.toISOString().split("T")[0];
+            queryObject.dateEnd = thisMonthEnd.toISOString().split("T")[0];
+            // queryObject.dateEnd = today.toISOString().split("T")[0];  // removed for testing
+        }
     }
 
     if (Object.keys(queryObject).length === 0) {
