@@ -55,7 +55,7 @@ export const SearchBar = () => {
 
    return (
     <>
-        <nav aria-label="Main Navigation" className="flex border-solid rounded-md shadow focus:outline w-md">
+        <div aria-label="Main Navigation" className="flex border-solid rounded-md shadow focus:outline w-lg m-2">
             <form role="search" 
                   onSubmit={handleSearch}
                   className="flex justify-between items-center gap-2 w-full">
@@ -81,7 +81,7 @@ export const SearchBar = () => {
                     X
                 </button>
             </form>
-        </nav>
+        </div>
     </>
    )
 }

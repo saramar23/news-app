@@ -4,6 +4,7 @@ import { fetchArticles } from "./services/newsApi";
 import { HomePage } from "./components/HomePage/HomePage";
 import { SearchProvider } from "./contexts/SearchContext";
 import { FilterProvider } from "./contexts/FilterContext";
+import { BrowserRouter } from "react-router-dom";
 
 function App() {
 
@@ -21,11 +22,13 @@ function App() {
   }, []);
 
   return (
-    <SearchProvider>
-      <FilterProvider>
-          <HomePage />
-      </FilterProvider>
-    </SearchProvider>
+    <BrowserRouter>
+      <SearchProvider>
+        <FilterProvider>
+            <HomePage />
+        </FilterProvider>
+      </SearchProvider>
+    </BrowserRouter>
   );
 }
 
