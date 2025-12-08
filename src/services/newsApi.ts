@@ -90,12 +90,13 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
         includeArticleImage: true,    
         apiKey: apiKey
     };
+
         var attempts = 0;
         const maxAttempts = 3;
         while (attempts < maxAttempts) {
             try {
                 console.log("Fetching category:", category, "→", queryObject.categoryUri); /////////////
-
+                // if not working go back to post and url instead of finalUrl, uncomment header and body
                 const response = await fetch(url, {
                     method: "POST",
                     headers: {
@@ -143,25 +144,19 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
     };
 }
 
-
-// const articles = await fetchArticles({
-//     category: "Technology",
-//     query: "AI",
-//     date: "Today",
-//     sort: "Most Relevant",
-//     limit: 3,
-// });
-
-// uri: '8889302461'
-
 export const fetchArticleById = async (params: Article["uri"]): Promise<Article | null> => {
+
+    const normalizedUri = params.includes("-") ? params.split("-").pop()! : params;
     
-    const url = `https://eventregistry.org/api/v1/article/getArticle/`;
+    const url = `https://eventregistry.org/api/v1/article/getArticle`;
     var attempts = 0;
     const maxAttempts = 3;
 
     const requestBody = {
-        articleUri: params,
+        articleUri: normalizedUri,
+        infoArticleBodyLen: -1,
+        resultType: "info",
+        includeArticleBody: true,
         apiKey: apiKey
     };
 
@@ -183,12 +178,19 @@ export const fetchArticleById = async (params: Article["uri"]): Promise<Article 
             }
             const data = await response.json();
 
-            if (!data.article) {
-                console.log("Sorry but we couldn't find any article with that id :( .");
+            const article = data[normalizedUri];
+
+            if (!article) {
+                console.log("Article not found for URI:", normalizedUri);
+                console.error("API Response Data:", data);
                 return null;
             }
+
+            const returnedArticle = article.info || article;
+
+            console.log("Returned Article Object:", article);
             console.log("Article fetched by id successfully :D Gg!");
-            return data.article as Article;
+            return returnedArticle as Article;
         } catch (error) {
             console.error(`Attempt ${attempts + 1} error:`, error);
             attempts++;

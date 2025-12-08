@@ -67,7 +67,7 @@ export const useArticles = (
         }
             
         try {
-            // ...filter: It keeps the code clean and readable, It avoids manually writing each filter field again
+            // ...filters: It keeps the code clean and readable, It avoids manually writing each filter field again
             const result: {articles: Article[], totalResults: number} = await fetchArticles({ ...filters, query: searchQuery, page, limit: pageSize});
 
             console.log("useArticles filters:", filters);

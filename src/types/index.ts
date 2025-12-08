@@ -116,3 +116,15 @@ export type PaginationProps = {
   setPage: (newPage: number) => void,
   totalPages: number
 }
+
+export const categoryColors: Record<string, string> = {
+  Technology: "text-blue-600 bg-blue-100",
+  Health: "text-red-600 bg-red-100",
+  Games: "text-fuchsia-600 bg-fuchsia-100",
+  Business: "text-orange-600 bg-orange-100",
+  Science: "text-purple-600 bg-purple-100",
+  Sports: "text-sky-600 bg-sky-100",
+  Society: "text-amber-600 bg-amber-100",
+  Entertainment: "text-yellow-600 bg-yellow-100",
+  Environment: "text-green-600 bg-green-200"
+}

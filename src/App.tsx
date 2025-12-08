@@ -4,7 +4,8 @@ import { fetchArticles } from "./services/newsApi";
 import { HomePage } from "./components/HomePage/HomePage";
 import { SearchProvider } from "./contexts/SearchContext";
 import { FilterProvider } from "./contexts/FilterContext";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ArticleDetail } from "./components/ArticleDetail/ArticleDetail";
 
 function App() {
 
@@ -25,7 +26,11 @@ function App() {
     <BrowserRouter>
       <SearchProvider>
         <FilterProvider>
-            <HomePage />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/article/:articleUri" element={<ArticleDetail />} />
+            
+          </Routes>
         </FilterProvider>
       </SearchProvider>
     </BrowserRouter>

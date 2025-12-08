@@ -1,7 +1,8 @@
 import React from "react";
-import type { ArticleCardProps } from "../../types";
+import { categoryColors, type ArticleCardProps } from "../../types";
 import { getTimeAgo } from "../../utils/getTimeAgo";
 import { useSearch } from "../../hooks/useSearch";
+import { Link } from "react-router-dom";
 
 // React Functional Component<name> (React FC) 
 // ArticleCard {article} needs to match the props inside ArticleCardProps. Destructuring is done to avoid writing props.article
@@ -22,18 +23,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
 
     // ?? Is called the -nullish coalescing operator- it falls back to "Unknown source" if the title is null or undefined. Not triggered by ""
     const source = article.source?.title ?? 'Unknown Source';
-    
-    const categoryColors: Record<string, string> = {
-        Technology: "text-blue-600 bg-blue-100",
-        Health: "text-red-600 bg-red-100",
-        Games: "text-fuchsia-600, bg-fuchsia-100",
-        Business: "text-orange-600 bg-orange-100",
-        Science: "text-purple-600, bg-purple-100",
-        Sports: "text-sky-600 bg-sky-100",
-        Society: "text-amber-600 bg-amber-100",
-        Entertainment: "text-yellow-600 bg-yellow-100",
-        Environment: "text-green-600 bg-green-200"
-    }
 
     const highlightSearch = (text: string, query: string, maxLength = 120) => {      
         if (!query) return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -41,10 +30,11 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
         const escapedHighlight = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         // Search globally, case insensitive (gi)
         const regex = new RegExp(`(${escapedHighlight})`, 'gi'); 
-        const highlighted = text.replace(regex, match => `<mark className="bg-yellow-200">${match}</mark>`);
+        const highlighted = text.replace(regex, match => `<mark class="bg-yellow-200">${match}</mark>`); /// check class or className
         return highlighted;
     }
 
+    console.log("Article object:", article);
     // IMG: full width of the container, full height, crop the image(cover) 
     // Divide tailwind size by 4 to get rem
     // news-image fallback CSS class
@@ -57,7 +47,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
 
     return (
         <article className="block h-[35rem] rounded-md shadow hover:shadow-lg transition overflow-hidden m-6" >
-            <a href={article.url} target="_blank" rel="noopener noreferrer" >
+            <Link to={`/article/${article.uri}`}>
                 <div className="h-1/2" >
                     <img src={imgSource} alt={article.title} className="w-full h-full object-cover news-image"/>
                 </div>
@@ -78,7 +68,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                        highlightSearch(article.body + '...', searchQuery) : 
                        "No content available"}}></p>
                 </div>
-            </a>
+            </Link>
         </article>
     )
 }

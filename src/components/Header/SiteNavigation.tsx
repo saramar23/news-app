@@ -8,14 +8,13 @@ export const SiteNavigation: React.FC = () => {
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth >= 768) setIsOpen(false);
+            if (window.innerWidth >= 1024) setIsOpen(false);
         };
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     // removed gap on ul after {}
-    // try lg:hidden on button
 
     return (
         <nav aria-label="Main Menu" role="navigation">
@@ -38,11 +37,11 @@ export const SiteNavigation: React.FC = () => {
                     } list-none md:static md:flex md:flex-row md:items-center md:py-4`}
                 >
                     {[
-                    { label: "Technology", to: "/technology", aria: "Explore technology news" },
-                    { label: "Games", to: "/games", aria: "Discover gaming updates" },
-                    { label: "Business", to: "/business", aria: "Read business insights" },
-                    { label: "Health", to: "/health", aria: "Check health articles" },
-                    { label: "Science", to: "/science", aria: "Browse science topics" },
+                    { label: "Technology", to: "/technology", aria: "Read technology articles" },
+                    { label: "Games", to: "/games", aria: "Read gaming articles" },
+                    { label: "Business", to: "/business", aria: "Read business articles" },
+                    { label: "Health", to: "/health", aria: "Read health articles" },
+                    { label: "Science", to: "/science", aria: "Read science articles" },
                     ].map((item) => (
                     <li
                         key={item.label}
