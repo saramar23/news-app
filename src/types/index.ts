@@ -128,3 +128,9 @@ export const categoryColors: Record<string, string> = {
   Entertainment: "text-yellow-600 bg-yellow-100",
   Environment: "text-green-600 bg-green-200"
 }
+
+export type RelatedArticlesType = {
+  category: Category | null,
+  excludeId: Article["uri"],
+  limit: number
+}

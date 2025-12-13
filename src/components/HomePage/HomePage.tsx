@@ -14,7 +14,7 @@ export const HomePage: React.FC = () => {
     const [ page, setPage ] = useState(1);
     const pageSize = 6;
     const { articles, isLoading, error, totalResults} = useArticles(filters, searchQuery, page, pageSize);
-    const MAX_TOTAL_PAGES = 50;
+    const MAX_TOTAL_PAGES = 12;
     const totalPages = Math.min(Math.ceil(totalResults / pageSize), MAX_TOTAL_PAGES);
 
     useEffect(() => {

@@ -1,14 +1,16 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useArticleId } from "../../hooks/useArticleId";
 import { Header } from "../Header/Header";
 import { getTimeAgo } from "../../utils/getTimeAgo";
 import { categoryColors } from "../../types";
+import { Breadcrumb } from "../Header/Breadcrumb";
 
 export const ArticleDetail: React.FC = () => {
 
     // useParams() is a hook from react router that checks the URL path and grabs a segment (in this case :articleUri)
     const { articleUri } = useParams<{ articleUri: string }>();
 
+    // Some articles ids are "8984020832" and some are "2025-11-2348283402" so we only extract the last part
     const extractNumericId = (uri: string): string => {
         const parts = uri.split('-');
         return parts[parts.length - 1]; 
@@ -25,6 +27,7 @@ export const ArticleDetail: React.FC = () => {
         return (
             <>
                 <Header />
+                <Breadcrumb />
                 <div className="flex justify-center w-full p-8 pt-20">
                     {isLoading && <p className="text-xl text-gray-500">Loading...</p>}
                     {error && <p className="text-red-500">{error}</p>}
@@ -44,14 +47,10 @@ export const ArticleDetail: React.FC = () => {
     return (
         <>
             <Header />
-            <div className="w-full max-w-4xl px-4 py-8 space-y-8 mx-auto text-left">
-                <div className="text-sm text-gray-500 mb-4">
-                    <Link to="/" className="hover:underline">Home</Link> 
-                    <span> / Article</span>
-                </div>
-                
+            <Breadcrumb />
+            <div className="w-full max-w-4xl px-4 py-2 space-y-8 mx-auto text-left">                
                 <header className="space-y-4">
-                    <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-gray-900">
+                    <h1 className="text-4xl sm:text-5xl leading-tight text-gray-900">
                         {articleById.title}
                     </h1>
                     <div className="flex flex-wrap space-x-4 text-sm text-gray-600">
@@ -59,7 +58,7 @@ export const ArticleDetail: React.FC = () => {
                             {category}
                         </span>
                         <span>•</span>
-                        <span className="font-medium text-gray-700">By **{sourceTitle}**</span>
+                        <span className="font-medium text-gray-700">By {sourceTitle}</span>
                         <span>•</span>
                         <span>Published {timeAgo}</span>
                     </div>
@@ -73,11 +72,11 @@ export const ArticleDetail: React.FC = () => {
                 </div>
                 <section className="prose prose-lg max-w-none text-gray-800">
                     <p className="whitespace-pre-line"> 
-                        {articleById.body ?? "The full article body is currently unavailable."}
+                        {articleById.body ?? "Article body currently unavailable."}
                     </p>
                 </section>
 
-                {/* Link to Original Article */}
+                {/* Link to original, for comparison lol */}
                 <div className="pt-4">
                     <a 
                         href={articleById.url} 
@@ -85,7 +84,7 @@ export const ArticleDetail: React.FC = () => {
                         rel="noopener noreferrer"
                         className="inline-flex px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition"
                     >
-                        Read Full Source Article →
+                        Read Article on Source →
                     </a>
                 </div>
             </div>
