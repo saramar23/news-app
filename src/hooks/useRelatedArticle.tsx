@@ -18,6 +18,7 @@ export const useRelatedArticles = ( currentCategory: string, articleId: string )
             let finalArticles: Article[] = [];
             try {
                 setLoading(true);
+                // Fetching more articles than needed and filtering our by URI to avoid duplicates in the same category, but only showing 5 unique in UI
                 const primaryParams: FetchArticlesParams = { category: currentCategory as FetchArticlesParams['category'], limit: ARTICLE_LIMIT * 2};
                 const { articles: primaryResults } = await fetchArticles(primaryParams); 
 
