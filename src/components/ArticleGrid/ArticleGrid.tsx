@@ -7,7 +7,7 @@ export const ArticleGrid: React.FC<ArticleGridProps> = ({ articles, isLoading, e
     // md lg: medium/large screen size
       
     return (
-        <div className="pt-5">
+        <div className="pt-5 pb-5">
             {isLoading && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 news-grid">
                     {Array.from({ length: 6 }).map((_, i) => (<ArticleSkeletonCard key={i} />))}

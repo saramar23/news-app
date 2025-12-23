@@ -34,7 +34,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
         return highlighted;
     }
 
-    console.log("Article object:", article);
     // IMG: full width of the container, full height, crop the image(cover) 
     // Divide tailwind size by 4 to get rem
     // news-image fallback CSS class
@@ -46,7 +45,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
     // noreferrer prevents the browser from sending the referrer's url (my app) to the destination site
 
     return (
-        <article className="block h-[35rem] rounded-md shadow hover:shadow-lg transition overflow-hidden m-6" >
+        <article className="block h-[35rem] rounded-md shadow hover:shadow-lg transition overflow-hidden" >
             <Link to={`/article/${article.uri}`}>
                 <div className="h-1/2" >
                     <img src={imgSource} alt={article.title} className="w-full h-full object-cover news-image"/>
@@ -66,7 +65,8 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                     <p className="text-left p-2 overflow-hidden line-clamp-5 break-all" 
                        dangerouslySetInnerHTML={{__html: article.body ? 
                        highlightSearch(article.body + '...', searchQuery) : 
-                       "No content available"}}></p>
+                       "No content available"}}>
+                    </p>
                 </div>
             </Link>
         </article>

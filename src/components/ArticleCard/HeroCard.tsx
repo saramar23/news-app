@@ -1,26 +1,22 @@
-import React from "react";
-import { categoryColors, type ArticleCardProps } from "../../types";
-import { getTimeAgo } from "../../utils/getTimeAgo";
 import { Link } from "react-router-dom";
+import { categoryColors, type Article } from "../../types";
+import { getTimeAgo } from "../../utils/getTimeAgo";
 
-// React Functional Component<name> (React FC) 
-// ArticleCard {article} needs to match the props inside ArticleCardProps. Destructuring is done to avoid writing props.article
-export const RelatedArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
-    // Combine date and time from API to create a proper datetime string
+
+export const HeroArticleCard = ({ article }: { article: Article }) => {
+
     const timeAgo = getTimeAgo(article.dateTimePub);
     const imgSource = article.image || "/media/image-placeholder.png";
     const category = article.categories?.[0]?.label?.split('/')?.[1] ?? 'Uncategorized';
-    
-    // ?? Is called the -nullish coalescing operator- it falls back to "Unknown source" if the title is null or undefined. Not triggered by ""
     const source = article.source?.title ?? 'Unknown Source';
-    
+
     return (
-        <article className="block h-[20rem] rounded-md shadow hover:shadow-lg transition overflow-hidden" >
-            <Link to={`/article/${article.uri}`}>
-                <div className="h-1/2" >
+        <article className="w-full md:col-span-2 rounded-md shadow hover:shadow-lg transition overflow-hidden" >
+            <Link to={`/article/${article.uri}`} className="flex flex-col h-full">
+                <div className="h-[300px] md:h-[450px] overflow-hidden" >
                     <img src={imgSource} alt={article.title} className="w-full h-full object-cover news-image"/>
                 </div>
-                <div className="h-1/2 p-4 flex flex-col justify-start text-left">
+                <div className="p-4 flex flex-col justify-start text-left">
                     <div className="text-xs text-gray-500 mb-1">
                     <span className={`text-xs px-2 py-1 rounded-full ${categoryColors[category] || "text-gray-600 bg-gray-200"}`}>
                         {category}
@@ -31,6 +27,9 @@ export const RelatedArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                     <h2 className="text-left text-lg font-bold mb-1" 
                         dangerouslySetInnerHTML={{__html: article.title }}>
                     </h2>
+                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-all" 
+                        dangerouslySetInnerHTML={{__html: article.body }}>
+                    </p>
                 </div>
             </Link>
         </article>

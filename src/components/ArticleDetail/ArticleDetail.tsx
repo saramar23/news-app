@@ -94,7 +94,7 @@ export const ArticleDetail: React.FC = () => {
                         </div>
                     </div>
                     <aside className="space-y-2">
-                        <h2 className="text-xl px-6 font-semibold">Related Articles</h2>
+                        <h2 className="text-xl font-semibold">Related Articles</h2>
                         <RelatedArticles category={category} articleId={finalArticleId!} />
                     </aside>
                 </div>

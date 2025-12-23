@@ -96,9 +96,8 @@ export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{a
         while (attempts < maxAttempts) {
             try {
                 console.log("Fetching category:", category, "→", queryObject.categoryUri); /////////////
-                // if not working go back to post and url instead of finalUrl, uncomment header and body
                 const response = await fetch(url, {
-                    method: "POST",
+                    method: "POST", //////////////// Lol change it to Post
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -163,7 +162,7 @@ export const fetchArticleById = async (params: Article["uri"]): Promise<Article 
     while (attempts < maxAttempts) {
         try {
             const response = await fetch(url, {
-                method: "POST",
+                method: "POST", /// Lol change back to POST
                 headers: {
                     "Content-Type": "application/json",
                 },

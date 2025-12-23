@@ -17,26 +17,18 @@ export const useArticles = (
     const [ error, setError ] = useState<string | null>(null);
     const [ totalResults, setTotalResults ] = useState<number>(0); // store the total number of results from the API.
 
-    // Temporarily disabled for testing!
-    // const cacheRef = useRef<{ [key: string]: {articles: Article[], totalResults: number}}>({});
-
-    // cacheRef.current[key] stores and retrieves previously fetched results
+    // memoryCache.current[key] stores and retrieves previously fetched results
     // Before stringify: {  filters: { category: "Business", dateRange: "Today" },  searchQuery: "AI news" }
-    // After: cacheRef.current = {'{"filters":{"category":"Business"},"searchQuery":"AI"}': [ article list ], ....
-    
+    // After: cacheRef.current = {'{"filters":{"category":"Business"},"searchQuery":"AI"}'
+
+    // useRef is a mutable container whose .current property persists across renders. Does NOT trigger a render.
     const memoryCache = useRef<Record<string, { articles: Article[]; totalResults: number } >>({});
 
     useEffect(() => {
         const key = JSON.stringify({filters, searchQuery, page, pageSize});
         const fetchData = async() => {
-        
-        // if (cacheRef.current[key]) {
-        //     const cached = cacheRef.current[key];
-        //     setArticles(cached.articles);
-        //     setTotalResults(cached.totalResults);
-        //     return;
-        // }
 
+            // Change to check RAM first, then storage
         // Local storage
         const stored = localStorage.getItem(`newsCache:${key}`);
             if (stored) {
@@ -65,6 +57,8 @@ export const useArticles = (
             setIsLoading(false);
             return;
         }
+
+        //////// Stringify filters on dependency array? /////
             
         try {
             // ...filters: It keeps the code clean and readable, It avoids manually writing each filter field again
