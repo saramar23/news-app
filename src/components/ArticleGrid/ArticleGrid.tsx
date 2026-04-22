@@ -4,8 +4,7 @@ import type { ArticleGridProps } from "../../types";
 import { ArticleSkeletonCard } from "../ArticleCard/ArticleSkeletonCard";
 
 export const ArticleGrid: React.FC<ArticleGridProps> = ({ articles, isLoading, error }) => {
-    // md lg: medium/large screen size
-      
+
     return (
         <div className="pt-5 pb-5">
             {isLoading && (
@@ -18,8 +17,8 @@ export const ArticleGrid: React.FC<ArticleGridProps> = ({ articles, isLoading, e
             {!isLoading && !error && articles.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 news-grid">
                     {
-                        articles.map((article) => 
-                        <ArticleCard key={article.uri} article={article} />)
+                        articles.map((article) =>
+                            <ArticleCard key={article.uri} article={article} />)
                     }
                 </div>
             )}

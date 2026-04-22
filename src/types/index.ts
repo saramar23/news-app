@@ -36,6 +36,24 @@ export type ArticleCardProps = {
   article: Article;
 }
 
+export interface GNewsArticleDTO {
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  image: string;
+  publishedAt: string;
+  source: {
+    name: string;
+    url: string;
+  };
+}
+
+export interface GNewsResponse {
+  totalArticles: number;
+  articles: GNewsArticleDTO[];
+}
+
 export interface AppState {
   articles: Article[];
   totalResults: number;
@@ -59,21 +77,32 @@ export type ArticleGridProps = {
 
 export type Category = 
 | 'Technology' 
-| 'Games' 
+| 'Entertainment' 
 | 'Business' 
 | 'Health' 
 | 'Science' 
 
-// Record<Category, string> ensures map stays in sync with Category type, if I miss one of the Category in the CategoryMap, TS will yell at me
-// On the right side is how the API calls the category in its query
+export const ALL_TOPICS_CATEGORY_LABEL = "All topics";
 
 export const CATEGORY_URI_MAP: Record<Category, string> = {
-  Technology: "Computers",
-  Games: "Games",
-  Business: "Business",
-  Health: "Health",
-  Science: "Science"
+  Technology: "technology",
+  Entertainment: "entertainment",
+  Business: "business",
+  Health: "health",
+  Science: "science",
 };
+
+export const categoryColors: Record<string, string> = {
+  [ALL_TOPICS_CATEGORY_LABEL]: "text-gray-700 bg-gray-200",
+  Technology: "text-blue-600 bg-blue-100",
+  Health: "text-red-600 bg-red-100",
+  Games: "text-fuchsia-600 bg-fuchsia-100",
+  Business: "text-orange-600 bg-orange-100",
+  Science: "text-purple-600 bg-purple-100",
+  Sports: "text-sky-600 bg-sky-100",
+  Society: "text-amber-600 bg-amber-100",
+  Entertainment: "text-yellow-600 bg-yellow-100"
+}
 
 export type DateRange = 
 | 'Today'
@@ -115,18 +144,6 @@ export type PaginationProps = {
   page: number,
   setPage: (newPage: number) => void,
   totalPages: number
-}
-
-export const categoryColors: Record<string, string> = {
-  Technology: "text-blue-600 bg-blue-100",
-  Health: "text-red-600 bg-red-100",
-  Games: "text-fuchsia-600 bg-fuchsia-100",
-  Business: "text-orange-600 bg-orange-100",
-  Science: "text-purple-600 bg-purple-100",
-  Sports: "text-sky-600 bg-sky-100",
-  Society: "text-amber-600 bg-amber-100",
-  Entertainment: "text-yellow-600 bg-yellow-100",
-  Environment: "text-green-600 bg-green-200"
 }
 
 export type RelatedArticlesType = {

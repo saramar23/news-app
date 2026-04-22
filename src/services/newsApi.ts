@@ -1,143 +1,140 @@
-// ### Task 2: API Service Layer
-// **Objective:** Create a centralized service for all NewsAPI.ai interactions
+import {
+    ALL_TOPICS_CATEGORY_LABEL,
+    CATEGORY_URI_MAP,
+    type Article,
+    type FetchArticlesParams,
+    type GNewsArticleDTO,
+    type GNewsResponse,
+} from "../types";
+import { runGNewsThrottled } from "./gnewsThrottle";
 
-// **Requirements:**
-// - Create `services/newsApi.ts` with core API functions
-// - Implement `fetchArticles()` with filtering parameters
-// - Implement `fetchArticleById()` for single article retrieval
-// - Add proper error handling and response validation
-// - Include timeout and retry logic
+const API_KEY = import.meta.env.VITE_NEWS_API_KEY ?? "";
 
-// **Key Considerations:**
-// - How will you handle API rate limits gracefully?
-// - What should happen when the API is unavailable?
-// - How can you make the service testable and mockable?
+export const fetchArticles = async( params: FetchArticlesParams = {}): Promise<{articles: Article[]; totalResults: number}> => {
+    const { category, dateRange, sortOption = "Latest", query, page = 1 } = params;
 
-// **Success Criteria:** Can successfully fetch and log articles from NewsAPI.ai
+    const endpoint = query ? "search" : "top-headlines";
+    const url = new URL(`https://gnews.io/api/v4/${endpoint}`);
 
-
-import { CATEGORY_URI_MAP, type Article, type FetchArticlesParams } from "../types";
-
-const apiKey = import.meta.env.VITE_NEWS_API_KEY;
-
-export const fetchArticles = async(params: FetchArticlesParams = {}): Promise<{articles: Article[]; totalResults: number}> => {
-    
-    const url = new Request("https://eventregistry.org/api/v1/article/getArticles");
-    const { category, dateRange, source, sortOption = "Latest", query, page = 1} = params;
-
-    const queryObject: Record<string, any> = {};
+    const queryParams = new URLSearchParams({
+        apikey: API_KEY,
+        lang: "en",
+        max: "6",
+        page: page.toString(),
+    });
 
     if (category) {
-        const mapped = CATEGORY_URI_MAP[category];
-        if (mapped) {
-            queryObject.categoryUri = `dmoz/${mapped}`;
-            queryObject.lang = "eng";          //
-        }
-    }    
-
-    if (query) {
-        queryObject.keyword = query;
+        queryParams.set("category", CATEGORY_URI_MAP[category]);
     }
 
-    if (source) {
-        queryObject.sourceUri = source.uri;
+    if (query) {
+        queryParams.set("q", query);
     }
 
     if (dateRange) {
         const today = new Date(); // "YYYY-MM-DD"
+        let startDate: Date = new Date();
+
         if (dateRange === "Today") {
-            const todayStr = today.toISOString().split("T")[0];
-            queryObject.dateStart = todayStr;
-            queryObject.dateEnd = todayStr;
+            startDate.setHours(today.getHours() - 24);
         } else if (dateRange === "This Week") {
-            const thisWeekStart = new Date(today);
-            const thisWeekEnd = new Date(today); // for testing 
-            thisWeekStart.setDate(today.getDate() - 7);
-            thisWeekEnd.setDate(today.getDate() - 4); ///////// test
-            queryObject.dateStart = thisWeekStart.toISOString().split("T")[0];
-            queryObject.dateEnd = thisWeekEnd.toISOString().split("T")[0]; // added for testing
-            // queryObject.dateEnd = today.toISOString().split("T")[0]; removed for testing
+            startDate.setDate(today.getDate() - 6);
         } else if (dateRange === "This Month") {
-            const thisMonthStart = new Date(today);
-            const thisMonthEnd = new Date(today); //////
-            thisMonthStart.setDate(today.getDate() - 30);
-            thisMonthEnd.setDate(today.getDate() - 14); ///////////
-            queryObject.dateStart = thisMonthStart.toISOString().split("T")[0];
-            queryObject.dateEnd = thisMonthEnd.toISOString().split("T")[0];
-            // queryObject.dateEnd = today.toISOString().split("T")[0];  // removed for testing
+            startDate.setDate(today.getDate() - 29);
         }
+        queryParams.set("from", startDate.toISOString());
     }
 
-    if (Object.keys(queryObject).length === 0) {
-        queryObject.keyword = "news";
+    if (endpoint === "search") {
+        const sortMap: Record<string, string> = {
+            Latest: "publishedAt",
+            "Most Relevant": "relevance",
+            "Most Shared": "relevance",
+        };
+        queryParams.set("sortby", sortMap[sortOption] || "publishedAt");
     }
 
-    // payload for the API
-    const requestBody = {
-        query: {
-            $query: queryObject,
-            $lang: "eng",
-            $filter: {
-                forceMaxDataTimeWindow: "30",
-            },
-        },
-        resultType: "articles",
-        articlesSortBy:
-            sortOption === "Most Relevant" ? "rel" : sortOption === "Most Shared" ? "socialScore" : "date",
-        articlesCount: 6,
-        articlesPage: page, // tells event registry which page I want
-        includeArticleCategories: true,      
-        includeArticleImage: true,    
-        apiKey: apiKey
-    };
-
-        var attempts = 0;
+        let attempts = 0;
         const maxAttempts = 3;
         while (attempts < maxAttempts) {
             try {
-                console.log("Fetching category:", category, "→", queryObject.categoryUri); /////////////
-                const response = await fetch(url, {
-                    method: "POST", //////////////// Lol change it to Post
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(requestBody),
-                    signal: AbortSignal.timeout(5000)
-                });
+                const response = await runGNewsThrottled(() =>
+                    fetch(`${url.toString()}?${queryParams.toString()}`, {
+                        signal: AbortSignal.timeout(5000),
+                    })
+                );
+
+                if (response.status === 429) {
+                    throw new Error(
+                        "News API rate limit (429). Wait a few minutes or upgrade your GNews plan."
+                    );
+                }
                 
                 if (!response.ok) {
                     console.error(`Attempt ${attempts + 1} failed with status ${response.status}`);
                     attempts++;
                     continue;
                 }
-                const data = await response.json();   
-                console.log("Fetched", data.articles.results.length, "articles for", category); /////////
                 
-                if (!data?.articles?.results) {
+                const data: GNewsResponse = await response.json();
+                
+                if (!data) {
                     throw new Error("Unexpected response format (data is not in JSON format).");
                 }
+
+                const rawArticles = Array.isArray(data.articles) ? data.articles : [];
+
+                const articles = rawArticles.map((item: GNewsArticleDTO): Article => ({
+                    uri: item.url, 
+                    title: item.title,
+                    body: item.content || item.description,
+                    url: item.url,
+                    image: item.image,
+                    date: item.publishedAt.split("T")[0],
+                    time: item.publishedAt.split("T")[1].replace("Z", ""),
+                    dateTime: item.publishedAt,
+                    dateTimePub: item.publishedAt,
+                    summary: item.description,
+                    source: {
+                        dataType: "news",
+                        title: item.source.name,
+                        uri: item.source.url
+                    },
+                    author: item.source.name,
+                    categories: category
+                        ? [{ uri: CATEGORY_URI_MAP[category], label: category, wgt: 1 }]
+                        : [{ uri: "general", label: ALL_TOPICS_CATEGORY_LABEL, wgt: 1 }],
+                    sentiment: 0,
+                    entities: { people: [], organizations: [], locations: [] },
+                    socialScore: 0,
+                    language: "en"
+                }));
+
                 return {
-                    articles: data.articles.results, 
-                    totalResults: data.articles.totalResults ?? 0
+                    articles, 
+                    totalResults: data.totalArticles ?? 0
                 }
             } catch (error) {
+                if (error instanceof Error && error.message.includes("rate limit")) {
+                    throw error;
+                }
                 attempts++;
-            if (error instanceof Error && error.name === "AbortError") {
-                console.error("Fetch stopped early");
-            } else if (error instanceof Error && error.name === "TimeoutError") {
-                console.error("Timeout: It took more than 5 seconds to get the result!");
-            } else if (error instanceof Error) {
-                console.error(`Error: type: ${error.name}, message: ${error.message}`)
-            }
-            if (attempts >= maxAttempts) {
-                console.error("Error. Max attempts reached.");
-                return{
-                    articles: [], totalResults: 0
-                };
+                if (error instanceof Error && error.name === "AbortError") {
+                    console.error("Fetch stopped early");
+                } else if (error instanceof Error && error.name === "TimeoutError") {
+                    console.error("Timeout: It took more than 5 seconds to get the result!");
+                } else if (error instanceof Error) {
+                    console.error(`Error: type: ${error.name}, message: ${error.message}`)
+                }
+                if (attempts >= maxAttempts) {
+                    console.error("Error. Max attempts reached.");
+                    return {
+                        articles: [], totalResults: 0
+                    };
+                }
             }
         }
-    }
-    return{
+    return {
         articles: [], totalResults: 0
     };
 }
@@ -156,13 +153,13 @@ export const fetchArticleById = async (params: Article["uri"]): Promise<Article 
         resultType: "info",
         includeArticleBody: true,
         includeArticleCategories: true,     
-        apiKey: apiKey
+        apiKey: API_KEY
     };
 
     while (attempts < maxAttempts) {
         try {
             const response = await fetch(url, {
-                method: "POST", /// Lol change back to POST
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -186,8 +183,6 @@ export const fetchArticleById = async (params: Article["uri"]): Promise<Article 
             }
 
             const returnedArticle = article.info || article;
-
-            console.log("Returned Article Object:", article);
             console.log("Article fetched by id successfully :D Gg!");
             return returnedArticle as Article;
         } catch (error) {

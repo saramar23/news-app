@@ -14,7 +14,7 @@ export const Pagination: React.FC<PaginationProps> = ({ page, setPage, totalPage
     // Array.from creates an Array of page nums from 1 to totPag, length creates an empty array with -totalPages- slots (gives a length to the array pretty much)
     // _ is the current element
     const pageNumbers = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-    const visiblePages = [];
+    const visiblePages: (string | number)[] = [];
 
     if (startPage > 1) visiblePages.push(1);
     if (startPage > 2) visiblePages.push("...");

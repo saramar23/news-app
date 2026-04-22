@@ -1,14 +1,20 @@
 import { Link } from "react-router-dom";
 import { categoryColors, type Article } from "../../types";
-import { getTimeAgo } from "../../utils/getTimeAgo";
-
+import { getArticleDisplayFields } from "../../utils/articleDisplay";
+import { highlightSearch, HighlightedText } from "../../utils/searchHighlight";
+import { useSearch } from "../../hooks/useSearch";
 
 export const HeroArticleCard = ({ article }: { article: Article }) => {
+    const { searchQuery } = useSearch();
+    const { timeAgo, imgSource, category, source } =
+        getArticleDisplayFields(article);
 
-    const timeAgo = getTimeAgo(article.dateTimePub);
-    const imgSource = article.image || "/media/image-placeholder.png";
-    const category = article.categories?.[0]?.label?.split('/')?.[1] ?? 'Uncategorized';
-    const source = article.source?.title ?? 'Unknown Source';
+    const titleSegments = article.title
+        ? highlightSearch({ text: article.title, query: searchQuery })
+        : [{ text: "No match found", highlight: false }];
+    const bodySegments = article.body
+        ? highlightSearch({ text: article.body, query: searchQuery })
+        : [{ text: "No content available", highlight: false }];
 
     return (
         <article className="w-full md:col-span-2 rounded-md shadow hover:shadow-lg transition overflow-hidden" >
@@ -24,11 +30,11 @@ export const HeroArticleCard = ({ article }: { article: Article }) => {
                     <span className="m-1">{source} </span>•
                     <span className="m-1">{timeAgo}</span>
                     </div>
-                    <h2 className="text-left text-lg font-bold mb-1" 
-                        dangerouslySetInnerHTML={{__html: article.title }}>
+                    <h2 className="text-left text-lg font-bold mb-1">
+                        <HighlightedText segments={titleSegments} />
                     </h2>
-                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-all" 
-                        dangerouslySetInnerHTML={{__html: article.body }}>
+                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-all">
+                        <HighlightedText segments={bodySegments} />
                     </p>
                 </div>
             </Link>

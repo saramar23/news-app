@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Article, FetchArticlesParams } from "../types";
+import { CATEGORY_URI_MAP, type Article, type Category, type FetchArticlesParams } from "../types";
 import { fetchArticles } from "../services/newsApi";
 
 export const useRelatedArticles = ( currentCategory: string, articleId: string ) => {
@@ -18,12 +18,22 @@ export const useRelatedArticles = ( currentCategory: string, articleId: string )
             let finalArticles: Article[] = [];
             try {
                 setLoading(true);
-                // Fetching more articles than needed and filtering our by URI to avoid duplicates in the same category, but only showing 5 unique in UI
-                const primaryParams: FetchArticlesParams = { category: currentCategory as FetchArticlesParams['category'], limit: ARTICLE_LIMIT * 2};
-                const { articles: primaryResults } = await fetchArticles(primaryParams); 
 
-                finalArticles = primaryResults.filter(article => article.uri !== articleId).slice(0, ARTICLE_LIMIT);
-                
+                const checkValidCategory = (cat: string): cat is Category => {
+                    return cat in CATEGORY_URI_MAP;
+                }
+
+                if (checkValidCategory(currentCategory)) {
+                    // Fetching more articles than needed and filtering our by URI to avoid duplicates in the same category, but only showing 5 unique in UI
+                    const primaryParams: FetchArticlesParams = { category: currentCategory, limit: ARTICLE_LIMIT * 2};
+                    const { articles: primaryResults } = await fetchArticles(primaryParams); 
+                    finalArticles = primaryResults.filter(article => article.uri !== articleId).slice(0, ARTICLE_LIMIT);
+                } else {
+                    const primaryParams: FetchArticlesParams = { limit: ARTICLE_LIMIT * 2};
+                    const { articles: primaryResults } = await fetchArticles(primaryParams); 
+                    finalArticles = primaryResults.filter(article => article.uri !== articleId).slice(0, ARTICLE_LIMIT);
+                }
+
                 // If we only got 2 articles instead of 5 in same category, we fetch again to get the 3 remaining articles but without category, 
                 // choosing the latest ones
                 if (finalArticles.length < ARTICLE_LIMIT) {

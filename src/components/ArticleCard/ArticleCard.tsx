@@ -1,48 +1,22 @@
 import React from "react";
 import { categoryColors, type ArticleCardProps } from "../../types";
-import { getTimeAgo } from "../../utils/getTimeAgo";
+import { getArticleDisplayFields } from "../../utils/articleDisplay";
+import { highlightSearch, HighlightedText } from "../../utils/searchHighlight";
 import { useSearch } from "../../hooks/useSearch";
 import { Link } from "react-router-dom";
 
-// React Functional Component<name> (React FC) 
-// ArticleCard {article} needs to match the props inside ArticleCardProps. Destructuring is done to avoid writing props.article
 export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
     const { searchQuery } = useSearch();
-    // Combine date and time from API to create a proper datetime string
-    const timeAgo = getTimeAgo(article.dateTimePub);
-    const imgSource = article.image || "/media/image-placeholder.png";
-
-    // Access first category obj (it seems each article fetched from EventRegistry has multiple categories)
-    // ? is optional chaining in case categories is missing or empty
-    // The label string will return sth like: "dmoz/Society/Issues/Warfare_and_Conflict"
-    // Splitting at / and getting index 1 which is the top-lvl cat
-    // No cat or label will bring to Uncategorized
-    const category = article.categories?.[0]?.label?.split('/')?.[1] ?? 'Uncategorized';
     
-    console.log("Article categories:", article.categories, "→", category);
+    const { timeAgo, imgSource, category, source } =
+        getArticleDisplayFields(article);
 
-    // ?? Is called the -nullish coalescing operator- it falls back to "Unknown source" if the title is null or undefined. Not triggered by ""
-    const source = article.source?.title ?? 'Unknown Source';
-
-    const highlightSearch = (text: string, query: string, maxLength = 120) => {      
-        if (!query) return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-        // Escape the query  
-        const escapedHighlight = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Search globally, case insensitive (gi)
-        const regex = new RegExp(`(${escapedHighlight})`, 'gi'); 
-        const highlighted = text.replace(regex, match => `<mark class="bg-yellow-200">${match}</mark>`); /// check class or className
-        return highlighted;
-    }
-
-    // IMG: full width of the container, full height, crop the image(cover) 
-    // Divide tailwind size by 4 to get rem
-    // news-image fallback CSS class
-    // XS: text size
-    // mb: margin-bottom p-2 padding on all sides m-8 margin on all
-
-    // target _blank opens on a new tab
-    // noopener protects my app from malicious script that could be injected by the new page
-    // noreferrer prevents the browser from sending the referrer's url (my app) to the destination site
+    const titleSegments = article.title
+        ? highlightSearch({ text: article.title, query: searchQuery })
+        : [{ text: "No match found", highlight: false }];
+    const bodySegments = article.body
+        ? highlightSearch({ text: article.body, query: searchQuery })
+        : [{ text: "No content available", highlight: false }];
 
     return (
         <article className="block h-[35rem] rounded-md shadow hover:shadow-lg transition overflow-hidden" >
@@ -58,14 +32,11 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                     <span className="m-1">{source} </span>•
                     <span className="m-1">{timeAgo}</span>
                     </div>
-                    <h2 className="text-left text-lg font-bold p-2 mb-1" 
-                        dangerouslySetInnerHTML={{__html: article.title ?
-                        highlightSearch(article.title, searchQuery) :
-                        "No match found" }}></h2>
-                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-all" 
-                       dangerouslySetInnerHTML={{__html: article.body ? 
-                       highlightSearch(article.body + '...', searchQuery) : 
-                       "No content available"}}>
+                    <h2 className="text-left text-lg font-bold p-2 mb-1">
+                        <HighlightedText segments={titleSegments} />
+                    </h2>
+                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-all">
+                        <HighlightedText segments={bodySegments} />
                     </p>
                 </div>
             </Link>

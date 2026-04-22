@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useArticleId } from "../../hooks/useArticleId";
 import { Header } from "../Header/Header";
-import { getTimeAgo } from "../../utils/getTimeAgo";
+import { getArticleDisplayFields } from "../../utils/articleDisplay";
 import { categoryColors } from "../../types";
 import { Breadcrumb } from "../Header/Breadcrumb";
 import { RelatedArticles } from "./Sidebar/RelatedArticles";
@@ -11,7 +11,7 @@ export const ArticleDetail: React.FC = () => {
     // useParams() is a hook from react router that checks the URL path and grabs a segment (in this case :articleUri)
     const { articleUri } = useParams<{ articleUri: string }>();
 
-    // Some articles ids are "8984020832" and some are "2025-11-2348283402" so we only extract the last part
+   // To be changed to adapt to new gnews.io API
     const extractNumericId = (uri: string): string => {
         const parts = uri.split('-');
         return parts[parts.length - 1]; 
@@ -19,9 +19,7 @@ export const ArticleDetail: React.FC = () => {
 
     const finalArticleId = articleUri ? extractNumericId(articleUri) : undefined;
 
-    // call the hook if articleUri exists, otherwise pass those values
-    const articleData = finalArticleId ? useArticleId(finalArticleId) : { articleById: undefined, isLoading: false, error: null };
-    // Now articleById, isLoading, and error always exist
+    const articleData = useArticleId(finalArticleId || "");
     const { articleById, isLoading, error } = articleData;
 
     if (isLoading || error || !articleById) {
@@ -40,12 +38,8 @@ export const ArticleDetail: React.FC = () => {
         );
     }
 
-    const imgSource = articleById.image || "/media/image-placeholder.png";
-    const timeAgo = getTimeAgo(articleById.dateTimePub);
-    const category = articleById.categories?.[0]?.label?.split('/')?.[1] ?? 'Uncategorized';
-    const sourceTitle = articleById.source?.title ?? "Unknown Source";
-
-    // 5xl is 1024px
+    const { timeAgo, imgSource, category, source } =
+        getArticleDisplayFields(articleById);
     
     return (
         <>
@@ -63,7 +57,7 @@ export const ArticleDetail: React.FC = () => {
                                     {category}
                                 </span>
                                 <span>•</span>
-                                <span className="font-medium text-gray-700">By {sourceTitle}</span>
+                                <span className="font-medium text-gray-700">By {source}</span>
                                 <span>•</span>
                                 <span>Published {timeAgo}</span>
                             </div>
@@ -95,7 +89,9 @@ export const ArticleDetail: React.FC = () => {
                     </div>
                     <aside className="space-y-2">
                         <h2 className="text-xl font-semibold">Related Articles</h2>
-                        <RelatedArticles category={category} articleId={finalArticleId!} />
+                        {finalArticleId && (
+                            <RelatedArticles category={category} articleId={finalArticleId} />
+                        )}
                     </aside>
                 </div>
             </div>

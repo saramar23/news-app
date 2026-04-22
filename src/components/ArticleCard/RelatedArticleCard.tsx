@@ -1,19 +1,19 @@
 import React from "react";
 import { categoryColors, type ArticleCardProps } from "../../types";
-import { getTimeAgo } from "../../utils/getTimeAgo";
+import { getArticleDisplayFields } from "../../utils/articleDisplay";
+import { highlightSearch, HighlightedText } from "../../utils/searchHighlight";
+import { useSearch } from "../../hooks/useSearch";
 import { Link } from "react-router-dom";
 
-// React Functional Component<name> (React FC) 
-// ArticleCard {article} needs to match the props inside ArticleCardProps. Destructuring is done to avoid writing props.article
 export const RelatedArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
-    // Combine date and time from API to create a proper datetime string
-    const timeAgo = getTimeAgo(article.dateTimePub);
-    const imgSource = article.image || "/media/image-placeholder.png";
-    const category = article.categories?.[0]?.label?.split('/')?.[1] ?? 'Uncategorized';
-    
-    // ?? Is called the -nullish coalescing operator- it falls back to "Unknown source" if the title is null or undefined. Not triggered by ""
-    const source = article.source?.title ?? 'Unknown Source';
-    
+    const { searchQuery } = useSearch();
+    const { timeAgo, imgSource, category, source } =
+        getArticleDisplayFields(article);
+
+    const titleSegments = article.title
+        ? highlightSearch({ text: article.title, query: searchQuery })
+        : [{ text: "No match found", highlight: false }];
+
     return (
         <article className="block h-[20rem] rounded-md shadow hover:shadow-lg transition overflow-hidden" >
             <Link to={`/article/${article.uri}`}>
@@ -28,8 +28,8 @@ export const RelatedArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                     <span className="m-1">{source} </span>•
                     <span className="m-1">{timeAgo}</span>
                     </div>
-                    <h2 className="text-left text-lg font-bold mb-1" 
-                        dangerouslySetInnerHTML={{__html: article.title }}>
+                    <h2 className="text-left text-lg font-bold mb-1">
+                        <HighlightedText segments={titleSegments} />
                     </h2>
                 </div>
             </Link>

@@ -14,7 +14,9 @@ export const TodaysPickPreview = () => {
                 </div>
             )}
             {error && <p className="text-red-500">{error}</p>}
-            {!isLoading && !error && (!featuredArticle || featuredArticle.length === 0) && <p>No articles found.</p>}
+            {!isLoading && !error && (!featuredArticle || featuredArticle.length === 0) && <div className="col-span-2">
+                    <p>No articles found</p>
+                </div>}
             {!isLoading && !error && featuredArticle && featuredArticle.length > 0 && (
                 <>
                     <HeroArticleCard article={featuredArticle[0]} />

@@ -42,7 +42,7 @@ export const useArticles = (
                 console.log("Using localStorage cache");
                 return; // do not call API
             } else {
-                localStorage.removeItem(`newsCache:${key}`); // stale
+                localStorage.removeItem(`newsCache:${key}`); 
             }
         }
 
@@ -67,7 +67,6 @@ export const useArticles = (
             console.log("useArticles filters:", filters);
             console.log("useArticles result:", result);
 
-
             setArticles(result.articles);
             setTotalResults(result.totalResults);
               
@@ -89,7 +88,7 @@ export const useArticles = (
         }
     };
         fetchData();
-    }, [filters, searchQuery, page, pageSize]); // Re-render any time either of them changes, then run fetchData(). fetchData checks the cache or runs fetchArticles(). 
+    }, [filters.category, filters.dateRange, filters.source, filters.sortOption, searchQuery, page, pageSize]); // Re-render any time either of them changes, then run fetchData(). fetchData checks the cache or runs fetchArticles(). 
     // It then updates articles, isLoading, error
     return {articles, isLoading, error, totalResults};
 };
