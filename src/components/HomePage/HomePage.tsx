@@ -5,7 +5,6 @@ import { useArticles } from "../../hooks/useArticles";
 import { useFilters } from "../../hooks/useFilters";
 import { useSearch } from "../../hooks/useSearch";
 import { Pagination } from "./Pagination";
-import { Header } from "../Header/Header";
 import { CategoryFilter } from "../Filters/CategoryFilter";
 import { DateRangeFilter } from "../Filters/DateRangeFilter";
 import { TodaysPickPreview } from "../ArticleDetail/Sidebar/TodaysPickPreview";
@@ -43,13 +42,12 @@ export const HomePage: React.FC = () => {
 
     return (
         <div className="">
-            <Header />
             <div className="pt-20 pb-6">
-                <h1 className="text-left mb-4">Today's Pick</h1>
+                <h2 className="text-left font-semibold mb-4">Today's Pick</h2>
                 <TodaysPickPreview />
             </div>
             <div className="flex justify-between flex-wrap gap-4 mt-2">
-                <h2 className="text-xl font-semibold">Latest News</h2>
+                <h2 className="font-semibold" id="latest-news">Latest News</h2>
                 <div className="flex justify-around gap-4">
                     <CategoryFilter />
                     <DateRangeFilter />

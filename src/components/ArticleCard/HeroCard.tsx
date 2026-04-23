@@ -30,10 +30,10 @@ export const HeroArticleCard = ({ article }: { article: Article }) => {
                     <span className="m-1">{source} </span>•
                     <span className="m-1">{timeAgo}</span>
                     </div>
-                    <h2 className="text-left text-lg font-bold mb-1">
+                    <h2 className="text-left font-bold mb-1">
                         <HighlightedText segments={titleSegments} />
                     </h2>
-                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-all">
+                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-word">
                         <HighlightedText segments={bodySegments} />
                     </p>
                 </div>

@@ -49,9 +49,9 @@ export const ArticleDetail: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-8">
                         <header className="space-y-4">
-                            <h1 className="text-4xl sm:text-5xl leading-tight text-gray-900">
+                            <h2 className="leading-tight text-gray-900">
                                 {articleById.title}
-                            </h1>
+                            </h2>
                             <div className="flex flex-wrap space-x-4 text-sm text-gray-600">
                                 <span className={`text-xs px-3 py-1 font-semibold rounded-full ${categoryColors[category] || "text-gray-700 bg-gray-200"}`}>
                                     {category}
@@ -88,7 +88,7 @@ export const ArticleDetail: React.FC = () => {
                         </div>
                     </div>
                     <aside className="space-y-2">
-                        <h2 className="text-xl font-semibold">Related Articles</h2>
+                        <h3 className="font-semibold">Related Articles</h3>
                         {finalArticleId && (
                             <RelatedArticles category={category} articleId={finalArticleId} />
                         )}

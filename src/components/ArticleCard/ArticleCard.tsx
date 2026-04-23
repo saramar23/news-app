@@ -32,10 +32,10 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                     <span className="m-1">{source} </span>•
                     <span className="m-1">{timeAgo}</span>
                     </div>
-                    <h2 className="text-left text-lg font-bold p-2 mb-1">
+                    <h3 className="text-left font-bold p-2 mb-1">
                         <HighlightedText segments={titleSegments} />
-                    </h2>
-                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-all">
+                    </h3>
+                    <p className="text-left p-2 overflow-hidden line-clamp-5 break-words">
                         <HighlightedText segments={bodySegments} />
                     </p>
                 </div>

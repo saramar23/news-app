@@ -6,7 +6,7 @@ export const Header = () => {
 
     return (
         <header>
-            <div className="fixed top-0 left-0 w-full z-50 bg-white shadow flex gap-1 justify-around items-center py-4">
+            <div className="fixed top-0 left-0 w-full z-50 bg-white shadow flex gap-1 justify-between items-center py-4">
                 <Logo />
                 <SearchBar />
                 <SiteNavigation />

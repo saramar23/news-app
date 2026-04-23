@@ -4,7 +4,7 @@ export const Breadcrumb = () => {
 
     const items = [
         { name: 'Home', path: '/' },
-        { name: 'Article', path: '/article' }
+        { name: 'Article', path: '/article' } // to be fixed
     ];
 
     return (

@@ -28,9 +28,9 @@ export const RelatedArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                     <span className="m-1">{source} </span>•
                     <span className="m-1">{timeAgo}</span>
                     </div>
-                    <h2 className="text-left text-lg font-bold mb-1">
+                    <h4 className="text-left font-bold mb-1">
                         <HighlightedText segments={titleSegments} />
-                    </h2>
+                    </h4>
                 </div>
             </Link>
         </article>

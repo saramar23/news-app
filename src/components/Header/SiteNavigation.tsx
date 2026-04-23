@@ -1,3 +1,4 @@
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -15,22 +16,22 @@ export const SiteNavigation: React.FC = () => {
     }, []);
 
     return (
-        <nav aria-label="Main Menu" role="navigation">
+        <nav aria-label="Main Menu" role="navigation" className="shrink-0">
             <div className="flex z-[1000] flex-row items-center justify-evenly p-4 h-[3em]">
                 <button
                     onClick={handleMenu}
-                    className="block text-[1.5rem] cursor-pointer text-right z-[1010] p-2 md:hidden"
+                    className="block text-[1.5rem] cursor-pointer text-right z-[1010] p-2 lg:hidden"
                     aria-label="Toggle navigation menu"
                     aria-expanded={isOpen}
                     aria-controls="menu"
                 >
-                    {isOpen ? "✕" : "☰"}
+                    {isOpen ? <X /> : <Menu />}
                 </button>
 
                 <ul
                     id="menu"
                     className={`${isOpen ? "block absolute top-0 left-0 w-full z-[1000] opacity-100 bg-white shadow-md" : "hidden"
-                        } list-none md:static md:flex md:flex-row md:items-center md:py-4`}
+                        } list-none lg:static lg:flex lg:flex-row md:items-center md:py-4`}
                 >
                     {[
                         { label: "Technology", to: "/technology", aria: "Read technology articles" },
@@ -43,7 +44,6 @@ export const SiteNavigation: React.FC = () => {
                             key={item.label}
                             className="p-4 my-4 text-center hover:bg-gray-200"
                             role="menuitem"
-                            tabIndex={0}
                             aria-label={item.aria}
                         >
                             <Link

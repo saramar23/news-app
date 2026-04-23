@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useSearch } from "../../hooks/useSearch";
+import { Search, X } from "lucide-react";
 
 export const SearchBar = () => {
     const { updateSearchQuery } = useSearch();
-    const [ inputValue, setInputValue ] = useState("");
+    const [inputValue, setInputValue] = useState("");
 
     useEffect(() => {
         const debounceSearch = setTimeout(() => {
@@ -15,56 +16,58 @@ export const SearchBar = () => {
         };
     }, [inputValue]);
 
-    // inputValue (local state) is updated on every keystroke, but doesn't trigger any fetch
-    /* handleChange is used to keep track of the users Input, then this input (its value) is updated and passed to handleSearch form function, 
-    * that will actually trigger the response by giving me the articles that match the input value.
-    */
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
     }
 
-    /* searchQuery triggers the fetch cause it's used by useArticles. It's not local but shared across components (HomePage, Grid, ..)
-    *   it only updates when calling updateSearchQuery, so handleSearch is like a bridge that commits the query
-    */
     const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         updateSearchQuery(inputValue);
-   }
+    }
 
     const clearSearch = () => {
         setInputValue("");
         updateSearchQuery("");
     }
 
-   return (
-    <>
-        <div aria-label="Main Navigation" className="flex border-solid rounded-md shadow-md focus:outline w-lg m-2">
-            <form role="search" 
-                  onSubmit={handleSearch}
-                  className="flex justify-between items-center gap-2 w-full">
-                <input 
-                    type="text" 
-                    name="search" 
-                    placeholder="Search articles..." 
-                    value={inputValue} 
-                    onChange={handleChange}
-                    className="flex-grow placeholder-gray-300 p-2"
-                />
-                <button 
-                    aria-label="Search articles" 
-                    type="submit"
-                    className="m-2">
-                        Search
-                </button>
-                <button 
-                    aria-label="Clear Search" 
-                    type="button" 
-                    onClick={clearSearch}
-                    className="m-2">
-                    X
-                </button>
-            </form>
-        </div>
-    </>
-   )
+    return (
+        <>
+            <div
+                aria-label="Main Navigation"
+                className="my-2 flex min-w-0 max-w-lg flex-1 border-solid rounded-md shadow-md focus:outline"
+            >
+                <form
+                    role="search"
+                    onSubmit={handleSearch}
+                    className="flex min-w-0 w-full items-center justify-between gap-1 px-1"
+                >
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Search keywords..."
+                        value={inputValue}
+                        onChange={handleChange}
+                        className="min-w-0 flex-1 border-0 bg-transparent py-2 pl-1 pr-1 placeholder-gray-300 outline-none focus:ring-0"
+                    />
+                    <div className="flex shrink-0 items-center gap-0 pr-0.5">
+                        <button
+                            aria-label="Search articles"
+                            type="submit"
+                            className="inline-flex p-1.5"
+                        >
+                            <Search />
+                        </button>
+                        <button
+                            aria-label="Clear Search"
+                            type="button"
+                            onClick={clearSearch}
+                            className="inline-flex p-1.5"
+                        >
+                            <X />
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </>
+    )
 }
