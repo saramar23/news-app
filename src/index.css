@@ -46,6 +46,7 @@ h3 {
 body {
   font-family: var(--font-family-body);
   font-size: var(--font-size-body);
+  line-height: 1.5;
 }
 
 /* Custom styles for the app */

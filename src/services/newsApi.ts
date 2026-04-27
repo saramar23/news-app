@@ -1,5 +1,4 @@
 import {
-    ALL_TOPICS_CATEGORY_LABEL,
     CATEGORY_URI_MAP,
     type Article,
     type FetchArticlesParams,
@@ -7,6 +6,7 @@ import {
     type GNewsResponse,
 } from "../types";
 import { runGNewsThrottled } from "./gnewsThrottle";
+import { mapGnewsToArticle } from "./mapGnewsToArticle";
 
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY ?? "";
 
@@ -83,32 +83,7 @@ export const fetchArticles = async( params: FetchArticlesParams = {}): Promise<{
                 }
 
                 const rawArticles = Array.isArray(data.articles) ? data.articles : [];
-
-                const articles = rawArticles.map((item: GNewsArticleDTO): Article => ({
-                    uri: item.url, 
-                    title: item.title,
-                    body: item.content || item.description,
-                    url: item.url,
-                    image: item.image,
-                    date: item.publishedAt.split("T")[0],
-                    time: item.publishedAt.split("T")[1].replace("Z", ""),
-                    dateTime: item.publishedAt,
-                    dateTimePub: item.publishedAt,
-                    summary: item.description,
-                    source: {
-                        dataType: "news",
-                        title: item.source.name,
-                        uri: item.source.url
-                    },
-                    author: item.source.name,
-                    categories: category
-                        ? [{ uri: CATEGORY_URI_MAP[category], label: category, wgt: 1 }]
-                        : [{ uri: "general", label: ALL_TOPICS_CATEGORY_LABEL, wgt: 1 }],
-                    sentiment: 0,
-                    entities: { people: [], organizations: [], locations: [] },
-                    socialScore: 0,
-                    language: "en"
-                }));
+                const articles = rawArticles.map((item: GNewsArticleDTO) => mapGnewsToArticle(item, category));
 
                 return {
                     articles, 
@@ -139,52 +114,35 @@ export const fetchArticles = async( params: FetchArticlesParams = {}): Promise<{
     };
 }
 
-export const fetchArticleById = async (params: Article["uri"]): Promise<Article | null> => {
+export const fetchArticleByUrl = async (url: string): Promise<Article | null> => {
 
-    const normalizedUri = params.includes("-") ? params.split("-").pop()! : params;
-    
-    const url = `https://eventregistry.org/api/v1/article/getArticle`;
-    var attempts = 0;
+    const search = new URL("https://gnews.io/api/v4/search");
+    search.searchParams.set("apikey", API_KEY);
+    search.searchParams.set("q", url);
+    search.searchParams.set("lang", "en");
+    search.searchParams.set("max", "1");
+    const apiUrl = search.toString();
+
+    let attempts = 0;
     const maxAttempts = 3;
-
-    const requestBody = {
-        articleUri: normalizedUri,
-        infoArticleBodyLen: -1,
-        resultType: "info",
-        includeArticleBody: true,
-        includeArticleCategories: true,     
-        apiKey: API_KEY
-    };
 
     while (attempts < maxAttempts) {
         try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(requestBody),
-                signal: AbortSignal.timeout(5000)
-            });
+            const response = await runGNewsThrottled(() =>
+                fetch(apiUrl, {
+                    signal: AbortSignal.timeout(5000),
+                })
+            );
 
             if (!response.ok) {
                 attempts++;
-                console.error(`Attempt ${attempts + 1} failed with status ${response.status}`);
+                console.error(`Attempt ${attempts} failed with status ${response.status}`);
                 continue;
             }
             const data = await response.json();
 
-            const article = data[normalizedUri];
-
-            if (!article) {
-                console.log("Article not found for URI:", normalizedUri);
-                console.error("API Response Data:", data);
-                return null;
-            }
-
-            const returnedArticle = article.info || article;
             console.log("Article fetched by id successfully :D Gg!");
-            return returnedArticle as Article;
+            return data.articles[0] ? mapGnewsToArticle(data.articles[0]) : null;
         } catch (error) {
             console.error(`Attempt ${attempts + 1} error:`, error);
             attempts++;

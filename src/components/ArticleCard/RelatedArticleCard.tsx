@@ -16,7 +16,7 @@ export const RelatedArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
 
     return (
         <article className="block h-[20rem] rounded-md shadow hover:shadow-lg transition overflow-hidden" >
-            <Link to={`/article/${article.uri}`}>
+            <Link to={`/article/${encodeURIComponent(article.uri)}`} state={{ article }}>
                 <div className="h-1/2" >
                     <img src={imgSource} alt={article.title} className="w-full h-full object-cover news-image"/>
                 </div>

@@ -18,7 +18,11 @@ export const HeroArticleCard = ({ article }: { article: Article }) => {
 
     return (
         <article className="w-full md:col-span-2 rounded-md shadow hover:shadow-lg transition overflow-hidden" >
-            <Link to={`/article/${article.uri}`} className="flex flex-col h-full">
+            <Link
+                to={`/article/${encodeURIComponent(article.uri)}`}
+                state={{ article }}
+                className="flex flex-col h-full"
+            >
                 <div className="h-[300px] md:h-[450px] overflow-hidden" >
                     <img src={imgSource} alt={article.title} className="w-full h-full object-cover news-image"/>
                 </div>
