@@ -1,56 +1,69 @@
-import { useParams } from "react-router-dom";
-import { useArticleId } from "../../hooks/useArticleId";
-import { Header } from "../Header/Header";
+import { type FC } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import { getArticleDisplayFields } from "../../utils/articleDisplay";
-import { categoryColors } from "../../types";
+import { categoryColors, type Article } from "../../types";
 import { Breadcrumb } from "../Header/Breadcrumb";
 import { RelatedArticles } from "./Sidebar/RelatedArticles";
+import { useArticleId } from "../../hooks/useArticleId";
 
-export const ArticleDetail: React.FC = () => {
+export type ArticleLocationState = { article?: Article };
 
-    // useParams() is a hook from react router that checks the URL path and grabs a segment (in this case :articleUri)
-    const { articleUri } = useParams<{ articleUri: string }>();
+export const ArticleDetail: FC = () => {
+    const { "*": articleUriSplat } = useParams();
+    const location = useLocation();
+    const state = location.state as ArticleLocationState | null;
 
-   // To be changed to adapt to new gnews.io API
-    const extractNumericId = (uri: string): string => {
-        const parts = uri.split('-');
-        return parts[parts.length - 1]; 
-    };
+    const encodedPath = articleUriSplat ?? "";
+    let decodedUri = "";
+    try {
+        decodedUri = encodedPath ? decodeURIComponent(encodedPath) : "";
+    } catch {
+        decodedUri = encodedPath;
+    }
 
-    const finalArticleId = articleUri ? extractNumericId(articleUri) : undefined;
+    const stateArticle = state?.article;
+    const initialArticle =
+        stateArticle &&
+        (stateArticle.uri === decodedUri ||
+            stateArticle.url === decodedUri ||
+            encodeURIComponent(stateArticle.uri) === encodedPath)
+            ? stateArticle
+            : undefined;
 
-    const articleData = useArticleId(finalArticleId || "");
-    const { articleById, isLoading, error } = articleData;
+    const { articleById, isLoading, error } = useArticleId(decodedUri, initialArticle);
+    const resolvedArticle = articleById ?? initialArticle ?? null;
 
-    if (isLoading || error || !articleById) {
+    if ((isLoading && !resolvedArticle) || (error && !resolvedArticle) || (!isLoading && !error && !resolvedArticle)) {
         return (
             <>
-                <Header />
                 <Breadcrumb />
                 <div className="flex justify-center w-full p-8 pt-20">
-                    {isLoading && <p className="text-xl text-gray-500">Loading...</p>}
-                    {error && <p className="text-red-500">{error}</p>}
-                    {!isLoading && !error && !articleById && (
-                        <p className="text-xl text-gray-500">Sorry but we couldn't find any article with that id 😞</p>
+                    {isLoading && !resolvedArticle && <p className="text-xl text-gray-500">Loading...</p>}
+                    {error && !resolvedArticle && <p className="text-red-500">{error}</p>}
+                    {!isLoading && !error && !resolvedArticle && (
+                        <p className="text-xl text-gray-500">Sorry but we couldn&#39;t find any article with that id 😞</p>
                     )}
                 </div>
             </>
         );
     }
 
-    const { timeAgo, imgSource, category, source } =
-        getArticleDisplayFields(articleById);
-    
+    if (!resolvedArticle) {
+        return null;
+    }
+
+    const article = resolvedArticle;
+    const { timeAgo, imgSource, category, source } = getArticleDisplayFields(article);
+
     return (
         <>
-            <Header />
             <Breadcrumb />
             <div className="w-full max-w-6xl px-4 py-2 space-y-8 mx-auto text-left">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-8">
                         <header className="space-y-4">
                             <h2 className="leading-tight text-gray-900">
-                                {articleById.title}
+                                {article.title}
                             </h2>
                             <div className="flex flex-wrap space-x-4 text-sm text-gray-600">
                                 <span className={`text-xs px-3 py-1 font-semibold rounded-full ${categoryColors[category] || "text-gray-700 bg-gray-200"}`}>
@@ -63,23 +76,22 @@ export const ArticleDetail: React.FC = () => {
                             </div>
                         </header>
                         <div className="w-full">
-                            <img 
-                                src={imgSource} 
-                                alt={articleById.title} 
+                            <img
+                                src={imgSource}
+                                alt={article.title}
                                 className="w-full max-h-[30rem] object-cover rounded-lg shadow-md"
                             />
                         </div>
                         <section className="prose prose-lg max-w-none text-gray-800">
-                            <p className="whitespace-pre-line"> 
-                                {articleById.body ?? "Article body currently unavailable."}
+                            <p className="whitespace-pre-line">
+                                {article.body ?? "Article body currently unavailable."}
                             </p>
                         </section>
 
-                        {/* Link to original, for comparison lol */}
                         <div className="pt-4">
-                            <a 
-                                href={articleById.url} 
-                                target="_blank" 
+                            <a
+                                href={article.url}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition"
                             >
@@ -89,12 +101,10 @@ export const ArticleDetail: React.FC = () => {
                     </div>
                     <aside className="space-y-2">
                         <h3 className="font-semibold">Related Articles</h3>
-                        {finalArticleId && (
-                            <RelatedArticles category={category} articleId={finalArticleId} />
-                        )}
+                        <RelatedArticles category={category} articleId={article.uri} />
                     </aside>
                 </div>
             </div>
         </>
-    )
-}
+    );
+};

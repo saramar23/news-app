@@ -1,5 +1,3 @@
-// - Create `hooks/useSearch.ts` for search functionality
-
 import { useContext } from "react";
 import { SearchContext } from "../contexts/SearchContext";
 

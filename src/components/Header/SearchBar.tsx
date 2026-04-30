@@ -14,7 +14,7 @@ export const SearchBar = () => {
         return () => {
             clearTimeout(debounceSearch);
         };
-    }, [inputValue]);
+    }, [inputValue, updateSearchQuery]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);

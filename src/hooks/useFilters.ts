@@ -16,28 +16,28 @@ export const useFilters = () => {
             ...prevFilters,
             category: newCategory,
         }));
-    }, []);
+    }, [setFilters]);
 
     const updateDateRange = useCallback((newDateRange: DateRange | undefined) => {
         setFilters((prevState) => ({
             ...prevState,
             dateRange: newDateRange,
         }));
-    }, []);
+    }, [setFilters]);
 
     const updateSource = useCallback((newSource: Source | undefined) => {
         setFilters((prevState) => ({
             ...prevState,
             source: newSource,
         }));
-    }, []);
+    }, [setFilters]);
 
     const updateSortOptions = useCallback((newSortOptions: SortOptions | undefined) => {
         setFilters((prevState) => ({
             ...prevState,
             sortOption: newSortOptions,
         }));
-    }, []);
+    }, [setFilters]);
     // return the current filters and the functions that update it, ofc
     return { filters, updateCategory, updateDateRange, updateSource, updateSortOptions };
 }

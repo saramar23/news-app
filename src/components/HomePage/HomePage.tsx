@@ -43,7 +43,7 @@ export const HomePage: React.FC = () => {
     return (
         <div className="">
             <div className="pt-20 pb-6">
-                <h2 className="text-left font-semibold mb-4">Today's Pick</h2>
+                <h2 className="text-left font-semibold mb-4">Today&#39;s Pick</h2>
                 <TodaysPickPreview />
             </div>
             <div className="flex justify-between flex-wrap gap-4 mt-2">

@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { CATEGORY_URI_MAP, type Article, type Category, type FetchArticlesParams } from "../types";
 import { fetchArticles } from "../services/newsApi";
 
-export const useRelatedArticles = ( currentCategory: string, articleId: string ) => {
-    const [ relatedArticles, setRelatedArticles ] = useState<Article[] | null>(null);
-    const [ isLoading, setLoading ] = useState<boolean>(false);
-    const [ error, setError ] = useState<string | null>(null);
-    
+export const useRelatedArticles = (currentCategory: string, articleId: string) => {
+    const [relatedArticles, setRelatedArticles] = useState<Article[] | null>(null);
+    const [isLoading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
     const ARTICLE_LIMIT = 5;
 
     useEffect(() => {
@@ -14,7 +14,7 @@ export const useRelatedArticles = ( currentCategory: string, articleId: string )
             return;
         }
 
-        const fetchRelated = async() => {
+        const fetchRelated = async () => {
             let finalArticles: Article[] = [];
             try {
                 setLoading(true);
@@ -25,12 +25,12 @@ export const useRelatedArticles = ( currentCategory: string, articleId: string )
 
                 if (checkValidCategory(currentCategory)) {
                     // Fetching more articles than needed and filtering our by URI to avoid duplicates in the same category, but only showing 5 unique in UI
-                    const primaryParams: FetchArticlesParams = { category: currentCategory, limit: ARTICLE_LIMIT * 2};
-                    const { articles: primaryResults } = await fetchArticles(primaryParams); 
+                    const primaryParams: FetchArticlesParams = { category: currentCategory, limit: ARTICLE_LIMIT * 2 };
+                    const { articles: primaryResults } = await fetchArticles(primaryParams);
                     finalArticles = primaryResults.filter(article => article.uri !== articleId).slice(0, ARTICLE_LIMIT);
                 } else {
-                    const primaryParams: FetchArticlesParams = { limit: ARTICLE_LIMIT * 2};
-                    const { articles: primaryResults } = await fetchArticles(primaryParams); 
+                    const primaryParams: FetchArticlesParams = { limit: ARTICLE_LIMIT * 2 };
+                    const { articles: primaryResults } = await fetchArticles(primaryParams);
                     finalArticles = primaryResults.filter(article => article.uri !== articleId).slice(0, ARTICLE_LIMIT);
                 }
 
@@ -51,16 +51,22 @@ export const useRelatedArticles = ( currentCategory: string, articleId: string )
                         finalArticles = finalArticles.concat(uniqueArticles);
                     } catch (err) {
                         // The error is logged instead of being thrown so we can still show the articles from the first fetch
-                        console.error("Fallback failed.");
+                        if (err instanceof Error) {
+                            console.error(err.message)
+                        }
                     }
                 }
                 setRelatedArticles(finalArticles);
             } catch (err) {
-                err instanceof Error ? setError(err.message) : setError("Error fetching the related articles.");
+                if (err instanceof Error) {
+                    setError(err.message)
+                } else {
+                    setError("Error fetching the related articles.")
+                }
             } finally {
-                setLoading(false);
-            }
-        }; fetchRelated();
+                setLoading(false)
+            }; fetchRelated();
+        }
     }, [currentCategory, articleId]);
     return { relatedArticles, isLoading, error };
 }
