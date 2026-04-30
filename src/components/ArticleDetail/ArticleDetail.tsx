@@ -41,7 +41,7 @@ export const ArticleDetail: FC = () => {
                     {isLoading && !resolvedArticle && <p className="text-xl text-gray-500">Loading...</p>}
                     {error && !resolvedArticle && <p className="text-red-500">{error}</p>}
                     {!isLoading && !error && !resolvedArticle && (
-                        <p className="text-xl text-gray-500">Sorry but we couldn't find any article with that id 😞</p>
+                        <p className="text-xl text-gray-500">Sorry but we couldn&#39;t find any article with that id 😞</p>
                     )}
                 </div>
             </>

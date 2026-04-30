@@ -1,6 +1,6 @@
 import { useFeaturedArticle } from "../../../hooks/useFeaturedArticle";
 import { RelatedArticleCard } from "../../ArticleCard/RelatedArticleCard";
-import { HeroArticleCard } from "../../ArticleCard/HeroCard";
+import { HeroArticleCard } from "../../ArticleCard/HeroArticleCard";
 
 export const TodaysPickPreview = () => {
 

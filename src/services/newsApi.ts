@@ -33,7 +33,7 @@ export const fetchArticles = async( params: FetchArticlesParams = {}): Promise<{
 
     if (dateRange) {
         const today = new Date(); // "YYYY-MM-DD"
-        let startDate: Date = new Date();
+        const startDate: Date = new Date();
 
         if (dateRange === "Today") {
             startDate.setHours(today.getHours() - 24);
@@ -44,11 +44,11 @@ export const fetchArticles = async( params: FetchArticlesParams = {}): Promise<{
         }
         queryParams.set("from", startDate.toISOString());
     }
-
+    // to fix
     if (endpoint === "search") {
         const sortMap: Record<string, string> = {
             Latest: "publishedAt",
-            "Most Relevant": "relevance",
+            "Most Relevant": "relevance",////
             "Most Shared": "relevance",
         };
         queryParams.set("sortby", sortMap[sortOption] || "publishedAt");
