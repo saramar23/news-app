@@ -9,7 +9,20 @@ import { runGNewsThrottled } from "./gnewsThrottle";
 import { mapGnewsToArticle } from "./mapGnewsToArticle";
 
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY ?? "";
-const PROXY_BASE = import.meta.env.VITE_NEWS_PROXY_URL?.replace(/\/$/, "") ?? "";
+
+function normalizeProxyBase(raw: string | undefined): string {
+    if (!raw) return "";
+    const headlinesPathSuffix = "/top-headlines";
+    let baseUrl = raw.trim().replace(/\/+$/, "");
+    if (baseUrl.toLowerCase().endsWith(headlinesPathSuffix)) {
+        baseUrl = baseUrl
+            .slice(0, -headlinesPathSuffix.length)
+            .replace(/\/+$/, "");
+    }
+    return baseUrl;
+}
+
+const PROXY_BASE = normalizeProxyBase(import.meta.env.VITE_NEWS_PROXY_URL);
 
 function buildGNewsQueryParams(
     params: FetchArticlesParams,
