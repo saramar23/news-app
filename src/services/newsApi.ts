@@ -9,19 +9,28 @@ import { runGNewsThrottled } from "./gnewsThrottle";
 import { mapGnewsToArticle } from "./mapGnewsToArticle";
 
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY ?? "";
+const PROXY_BASE = import.meta.env.VITE_NEWS_PROXY_URL?.replace(/\/$/, "") ?? "";
 
-export const fetchArticles = async( params: FetchArticlesParams = {}): Promise<{articles: Article[]; totalResults: number}> => {
-    const { category, dateRange, sortOption = "Latest", query, page = 1 } = params;
+function buildGNewsQueryParams(
+    params: FetchArticlesParams,
+    options: { includeApiKey: boolean }
+): { queryParams: URLSearchParams; endpoint: "search" | "top-headlines" } {
 
+    const { category, dateRange, sortOption = "Latest", query, page = 1, limit } = params;
     const endpoint = query ? "search" : "top-headlines";
-    const url = new URL(`https://gnews.io/api/v4/${endpoint}`);
+
+    const max =
+        limit != null && limit > 0 ? String(Math.min(limit, 100)) : "6";
 
     const queryParams = new URLSearchParams({
-        apikey: API_KEY,
         lang: "en",
-        max: "6",
+        max,
         page: page.toString(),
     });
+
+    if (options.includeApiKey) {
+        queryParams.set("apikey", API_KEY);
+    }
 
     if (category) {
         queryParams.set("category", CATEGORY_URI_MAP[category]);
@@ -44,84 +53,131 @@ export const fetchArticles = async( params: FetchArticlesParams = {}): Promise<{
         }
         queryParams.set("from", startDate.toISOString());
     }
-    // to fix
+
     if (endpoint === "search") {
         const sortMap: Record<string, string> = {
             Latest: "publishedAt",
-            "Most Relevant": "relevance",////
+            "Most Relevant": "relevance",///
             "Most Shared": "relevance",
         };
         queryParams.set("sortby", sortMap[sortOption] || "publishedAt");
     }
 
-        let attempts = 0;
-        const maxAttempts = 3;
-        while (attempts < maxAttempts) {
-            try {
-                const response = await runGNewsThrottled(() =>
-                    fetch(`${url.toString()}?${queryParams.toString()}`, {
-                        signal: AbortSignal.timeout(5000),
-                    })
-                );
-
-                if (response.status === 429) {
-                    throw new Error(
-                        "News API rate limit (429). Wait a few minutes or upgrade your GNews plan."
-                    );
-                }
-                
-                if (!response.ok) {
-                    console.error(`Attempt ${attempts + 1} failed with status ${response.status}`);
-                    attempts++;
-                    continue;
-                }
-                
-                const data: GNewsResponse = await response.json();
-                
-                if (!data) {
-                    throw new Error("Unexpected response format (data is not in JSON format).");
-                }
-
-                const rawArticles = Array.isArray(data.articles) ? data.articles : [];
-                const articles = rawArticles.map((item: GNewsArticleDTO) => mapGnewsToArticle(item, category));
-
-                return {
-                    articles, 
-                    totalResults: data.totalArticles ?? 0
-                }
-            } catch (error) {
-                if (error instanceof Error && error.message.includes("rate limit")) {
-                    throw error;
-                }
-                attempts++;
-                if (error instanceof Error && error.name === "AbortError") {
-                    console.error("Fetch stopped early");
-                } else if (error instanceof Error && error.name === "TimeoutError") {
-                    console.error("Timeout: It took more than 5 seconds to get the result!");
-                } else if (error instanceof Error) {
-                    console.error(`Error: type: ${error.name}, message: ${error.message}`)
-                }
-                if (attempts >= maxAttempts) {
-                    console.error("Error. Max attempts reached.");
-                    return {
-                        articles: [], totalResults: 0
-                    };
-                }
-            }
-        }
-    return {
-        articles: [], totalResults: 0
-    };
+    return { queryParams, endpoint };
 }
 
-export const fetchArticleByUrl = async (url: string): Promise<Article | null> => {
+export const fetchArticles = async (
+    params: FetchArticlesParams = {}
+): Promise<{ articles: Article[]; totalResults: number }> => {
+    const { category } = params;
 
-    const search = new URL("https://gnews.io/api/v4/search");
-    search.searchParams.set("apikey", API_KEY);
-    search.searchParams.set("q", url);
-    search.searchParams.set("lang", "en");
-    search.searchParams.set("max", "1");
-    const apiUrl = search.toString();
+    const useProxy = PROXY_BASE.length > 0;
+    const { queryParams, endpoint } = buildGNewsQueryParams(params, {
+        includeApiKey: !useProxy,
+    });
+
+    const url = new URL(`https://gnews.io/api/v4/${endpoint}`);
+    const requestUrl = useProxy
+        ? `${PROXY_BASE}/top-headlines?${queryParams.toString()}`
+        : `${url.toString()}?${queryParams.toString()}`;
+
+    if (!useProxy && !API_KEY) {
+        return { articles: [], totalResults: 0 };
+    }
+
+    let attempts = 0;
+    const maxAttempts = 3;
+    while (attempts < maxAttempts) {
+        try {
+            const response = await runGNewsThrottled(() =>
+                fetch(requestUrl, {
+                    signal: AbortSignal.timeout(5000),
+                })
+            );
+
+            if (response.status === 429) {
+                throw new Error(
+                    "News API rate limit (429). Wait a few minutes or upgrade your GNews plan."
+                );
+            }
+
+            if (!response.ok) {
+                console.error(`Attempt ${attempts + 1} failed with status ${response.status}`);
+                attempts++;
+                continue;
+            }
+
+            const data: GNewsResponse = await response.json();
+
+            if (!data) {
+                throw new Error("Unexpected response format (data is not in JSON format).");
+            }
+
+            const rawArticles = Array.isArray(data.articles) ? data.articles : [];
+            const articles = rawArticles.map((item: GNewsArticleDTO) =>
+                mapGnewsToArticle(item, category)
+            );
+
+            return {
+                articles,
+                totalResults: data.totalArticles ?? 0,
+            };
+        } catch (error) {
+            if (error instanceof Error && error.message.includes("rate limit")) {
+                throw error;
+            }
+            attempts++;
+            if (error instanceof Error && error.name === "AbortError") {
+                console.error("Fetch stopped early");
+            } else if (error instanceof Error && error.name === "TimeoutError") {
+                console.error("Timeout: It took more than 5 seconds to get the result!");
+            } else if (error instanceof Error) {
+                console.error(`Error: type: ${error.name}, message: ${error.message}`);
+            }
+            if (attempts >= maxAttempts) {
+                console.error("Error. Max attempts reached.");
+                return {
+                    articles: [],
+                    totalResults: 0,
+                };
+            }
+        }
+    }
+    return {
+        articles: [],
+        totalResults: 0,
+    };
+};
+
+export const fetchArticleByUrl = async (articleUrl: string): Promise<Article | null> => {
+    const useProxy = PROXY_BASE.length > 0;
+
+    const queryParams = new URLSearchParams({
+        q: articleUrl,
+        lang: "en",
+        max: "1",
+    });
+
+    if (useProxy) {
+        queryParams.set("sortby", "publishedAt");
+    } else {
+        queryParams.set("apikey", API_KEY);
+    }
+
+    const apiUrl = useProxy
+        ? `${PROXY_BASE}/top-headlines?${queryParams.toString()}`
+        : (() => {
+            const search = new URL("https://gnews.io/api/v4/search");
+            search.searchParams.set("apikey", API_KEY);
+            search.searchParams.set("q", articleUrl);
+            search.searchParams.set("lang", "en");
+            search.searchParams.set("max", "1");
+            return search.toString();
+        })();
+
+    if (!useProxy && !API_KEY) {
+        return null;
+    }
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -153,4 +209,4 @@ export const fetchArticleByUrl = async (url: string): Promise<Article | null> =>
         }
     }
     return null;
-}
+};
