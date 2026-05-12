@@ -32,9 +32,15 @@ export interface Article {
   [key: string]: unknown;
 }
 
+export type Variant = "hero" | "related" | "default";
+
+export type ArticleCardTitleLevel = "h2" | "h3" | "h4" | "h5" | "h6";
+
 export type ArticleCardProps = {
   article: Article;
-}
+  variant: Variant;
+  titleHeading?: ArticleCardTitleLevel;
+};
 
 export interface GNewsArticleDTO {
   title: string;

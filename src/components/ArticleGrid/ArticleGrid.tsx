@@ -18,7 +18,7 @@ export const ArticleGrid: React.FC<ArticleGridProps> = ({ articles, isLoading, e
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 news-grid">
                     {
                         articles.map((article) =>
-                            <ArticleCard key={article.uri} article={article} />)
+                            <ArticleCard key={article.uri} article={article} variant="default" />)
                     }
                 </div>
             )}
