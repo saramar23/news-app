@@ -19,7 +19,7 @@ export const RelatedArticles = ({ category, articleId }: { category: string, art
                 <div className="grid grid-cols-1 gap-4">
                     {
                         relatedArticles.map((article) =>
-                            <RelatedArticleCard key={article.uri} article={article} />)
+                            <RelatedArticleCard key={article.uri} article={article} variant="related"/>)
                     }
                 </div>
             )}

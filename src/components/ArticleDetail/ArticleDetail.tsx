@@ -62,7 +62,7 @@ export const ArticleDetail: FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-8">
                         <header className="space-y-4">
-                            <h2 className="leading-tight text-gray-900">
+                            <h2 className="font-bold text-gray-900">
                                 {article.title}
                             </h2>
                             <div className="flex flex-wrap space-x-4 text-sm text-gray-600">

@@ -6,12 +6,12 @@ export function getTimeAgo(isoDate: string): string {
     const diffMs = now.getTime() - published.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
-    if (diffMinutes < 1) return 'Just now';        // less than 1 minute
-    if (diffMinutes < 60) return `${diffMinutes}m ago`; // 1–59 minutes
+    if (diffMinutes < 1) return 'Just now';      
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
 
     const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;    // 1–23 hours
+    if (diffHours < 24) return `${diffHours}h ago`;   
 
     const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}d ago`;                        // 1+ days
+    return `${diffDays}d ago`;                        
 }
