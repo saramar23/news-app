@@ -8,8 +8,6 @@ import {
 import { runGNewsThrottled } from "./gnewsThrottle";
 import { mapGnewsToArticle } from "./mapGnewsToArticle";
 
-const API_KEY = import.meta.env.VITE_NEWS_API_KEY ?? "";
-
 function normalizeProxyBase(raw: string | undefined): string {
     if (!raw) return "";
     const headlinesPathSuffix = "/top-headlines";
@@ -24,9 +22,17 @@ function normalizeProxyBase(raw: string | undefined): string {
 
 const PROXY_BASE = normalizeProxyBase(import.meta.env.VITE_NEWS_PROXY_URL);
 
+function requireProxyBase(): string {
+    if (!PROXY_BASE) {
+        throw new Error(
+            "VITE_NEWS_PROXY_URL is missing or empty. Configure the news proxy URL."
+        );
+    }
+    return PROXY_BASE;
+}
+
 function buildGNewsQueryParams(
-    params: FetchArticlesParams,
-    options: { includeApiKey: boolean }
+    params: FetchArticlesParams
 ): { queryParams: URLSearchParams; endpoint: "search" | "top-headlines" } {
 
     const { category, dateRange, sortOption = "Latest", query, page = 1, limit } = params;
@@ -40,10 +46,6 @@ function buildGNewsQueryParams(
         max,
         page: page.toString(),
     });
-
-    if (options.includeApiKey) {
-        queryParams.set("apikey", API_KEY);
-    }
 
     if (category) {
         queryParams.set("category", CATEGORY_URI_MAP[category]);
@@ -83,20 +85,9 @@ export const fetchArticles = async (
     params: FetchArticlesParams = {}
 ): Promise<{ articles: Article[]; totalResults: number }> => {
     const { category } = params;
-
-    const useProxy = PROXY_BASE.length > 0;
-    const { queryParams, endpoint } = buildGNewsQueryParams(params, {
-        includeApiKey: !useProxy,
-    });
-
-    const url = new URL(`https://gnews.io/api/v4/${endpoint}`);
-    const requestUrl = useProxy
-        ? `${PROXY_BASE}/top-headlines?${queryParams.toString()}`
-        : `${url.toString()}?${queryParams.toString()}`;
-
-    if (!useProxy && !API_KEY) {
-        return { articles: [], totalResults: 0 };
-    }
+    const proxyBase = requireProxyBase();
+    const { queryParams } = buildGNewsQueryParams(params);
+    const requestUrl = `${proxyBase}/top-headlines?${queryParams.toString()}`;
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -163,34 +154,16 @@ export const fetchArticles = async (
 };
 
 export const fetchArticleByUrl = async (articleUrl: string): Promise<Article | null> => {
-    const useProxy = PROXY_BASE.length > 0;
+    const proxyBase = requireProxyBase();
 
     const queryParams = new URLSearchParams({
         q: articleUrl,
         lang: "en",
         max: "1",
+        sortby: "publishedAt",
     });
 
-    if (useProxy) {
-        queryParams.set("sortby", "publishedAt");
-    } else {
-        queryParams.set("apikey", API_KEY);
-    }
-
-    const apiUrl = useProxy
-        ? `${PROXY_BASE}/top-headlines?${queryParams.toString()}`
-        : (() => {
-            const search = new URL("https://gnews.io/api/v4/search");
-            search.searchParams.set("apikey", API_KEY);
-            search.searchParams.set("q", articleUrl);
-            search.searchParams.set("lang", "en");
-            search.searchParams.set("max", "1");
-            return search.toString();
-        })();
-
-    if (!useProxy && !API_KEY) {
-        return null;
-    }
+    const apiUrl = `${proxyBase}/top-headlines?${queryParams.toString()}`;
 
     let attempts = 0;
     const maxAttempts = 3;
